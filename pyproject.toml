@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "lmoe"
+version = "0.1.0"
+description = "LMoE (Local mixture of experts, pronounced 'Elmo') is your CLI assistant for general knowledge, coding, and image analysis."
+authors = ["Ryan Eiger <ryebosome@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+ollama = "^0.1.6"
+pyperclip = "^1.8.2"
+
+[tool.poetry.scripts]
+lmoe = "lmoe.main:run"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
