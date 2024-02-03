@@ -162,7 +162,7 @@ Coming soon.
 
 ## Status
 
-Version 0.1.0
+Version 0.1.01
 
 This is currently a very basic implementation which only supports a general expert, no
 configuration, does not automate environment setup, and does not have persistence.
