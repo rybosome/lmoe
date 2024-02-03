@@ -1,10 +1,17 @@
-# lmoe
+# Introduction
+
+<img src="https://rybosome.github.io/lmoe/assets/lmoe-armadillo.png">
 
 lmoe (pronounced "Elmo", a local Mixture of Experts) is a multimodal CLI assistant with a natural
 language interface.
 
 Running on Ollama and various open-weight models, lmoe is intended to be a convenient, low-overhead,
 low-configuration way to interact with AI models from the command line.
+
+## Lmoe Armadillo
+
+The mascot and avatar for the project is Lmoe Armadillo, a Cyborg [Cingulata](https://en.wikipedia.org/wiki/Cingulata)
+who is ready to dig soil and do toil.
 
 ## Examples
 
