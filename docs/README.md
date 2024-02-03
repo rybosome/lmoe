@@ -1,4 +1,6 @@
-# Lmoe
+# Introduction
+
+<img src="https://rybosome.github.io/lmoe/assets/lmoe-armadillo.png">
 
 lmoe (pronounced "Elmo", a local Mixture of Experts) is a multimodal CLI assistant with a natural
 language interface.
