@@ -78,18 +78,6 @@ Pipe it information from your computer and ask questions about it.
 ```
 
 ```
-% print -x 'hello'
-
-print: positive integer expected after -x: hello
-
-% echo 'print: positive integer expected after -x: hello' | lmoe 'why am I getting this error with the `print` shell command?'
-
- The `print` command in a Unix-like shell expects a positive integer as its argument to print that
- value to the console. You provided the string 'hello' instead, which is causing the error message
- you're seeing.
-```
-
-```
 % ls -la | lmoe how big is my zsh history
 
  The size of your Zsh history file is 16084 bytes.
@@ -97,66 +85,17 @@ print: positive integer expected after -x: hello
 
 #### Pasting context
 
-Let's copy the following code to the clipboard.
-
-```shell
-# Define the base directory for virtual environments
-VENVS_DIR="$HOME/.venvs"
-
-# Helper for manipulating Python virtual environments
-venv() {
-    if [[ $# -lt 1 ]]; then
-        echo "Usage: venv <command> [args]"
-        exit 1
-    fi
-
-    command="$1"
-    shift
-
-    case "$command" in
-        mkdir)
-            if [[ $# -lt 1 ]]; then
-                echo "Usage: venv mkdir <env_name>"
-                exit 1
-            fi
-            python3 -m venv "$VENVS_DIR/$1"
-            ;;
-        ls)
-            ls "$VENVS_DIR"
-            ;;
-        rm)
-            if [[ $# -lt 1 ]]; then
-                echo "Usage: venv rm <env_name>"
-                exit 1
-            fi
-            echo "Do you want to remove $1? (y/n): \c"
-            read confirm
-            if [[ $confirm == "y" ]]; then
-                rm -rf "$VENVS_DIR/$1"
-            fi
-            ;;
-        activate)
-            if [ -z "$1" ]; then
-            . "$VENVS_DIR/default/bin/activate"
-            else
-            . "$VENVS_DIR/$1/bin/activate"
-            fi
-            ;;
-        *)
-            echo "Unknown command. Available commands: mkdir, ls, rm, activate"
-            exit 1
-            ;;
-    esac
-}
-```
+Get an error message and copy it to the clipboard, then ask about it.
 
 ```
-% lmoe --paste what does this zsh script do
+% print -x 'hello'
+print: positive integer expected after -x: hello
 
- This zsh script defines a function named `venv` that assists in managing Python virtual
- environments. It provides several subcommands: "mkdir" for creating new environments, "ls" for
- listing existing environments, "rm" for removing environments, and "activate" for activating an
- environment. The base directory for all virtual environments is set to `$HOME/.venvs`.
+% lmoe --paste how do I fix this error
+ To use the `-x` option with the `print` command in Bash, you need to provide a positional argument that is a file descriptor. Instead, you provided a string 'hello'. Here's how you can correctly use it:
+
+1. Create or have a file with the name 'hello' and make sure it exists in your working directory.
+2. Run the following command instead: `print -r -- < hello`. This reads the contents of the file 'hello' as input for print, which displays its output to stdout.
 ```
 
 ### Code Generation
@@ -169,7 +108,7 @@ Coming soon.
 
 ## Status
 
-Version 0.1.01
+Version 0.1.1
 
 This is currently a very basic implementation which only supports a general expert, no
 configuration, does not automate environment setup, and does not have persistence.
@@ -179,7 +118,11 @@ others' use.
 
 ### Upcoming features
 
+* error handling
 * integration with code and image models
-* self-setup (after installing with pip)
+* support for command-like interface
+* self-setup of models and ollama context after installation
 * persisted context (i.e. memory, chat-like experience without a formal chat interface)
 * configurability
+* tests
+* plugin interface
