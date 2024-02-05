@@ -1,5 +1,5 @@
-from string import Template
 from lmoe.api.base_expert import BaseExpert
+from string import Template
 
 import ollama
 
@@ -16,27 +16,31 @@ $user_query
 )
 
 
-class Code(BaseExpert):
+class ProjectInitialization(BaseExpert):
 
     @classmethod
     def name(cls):
-        return "CODE"
+        return "PROJECT_INITIALIZATION"
 
     @classmethod
     def has_modelfile(cls):
         return True
 
     def description(self):
-        return "A model specifically for generating code. It is expected that this is an instruction-tuned model rather than a 'fill in the middle' model, meaning that a user will describe a coding task or coding question in natural language rather than supplying code and expecting the following code to be generated."
+        return "A model designed to initialize programming projects. Given verbal and ascii art descriptions and context, initializes programming projects in a number of different languages."
 
     def examples(self):
         return [
-            "write a python script which determines the largest directory in my home environment",
+            "what is the recommended layout for a python project with poetry",
+            "create a project for a java webserver using spring to serve the contents of the '/web/ directory",
+            "initialize a project for a new npm module",
+            "create a project like this",
+            "make a project like this one",
         ]
 
     def generate(self, user_context, user_query):
         stream = ollama.generate(
-            model="lmoe_code",
+            model="lmoe_project_initialization",
             prompt=_PROMPT_TEMPLATE.substitute(
                 user_context=user_context, user_query=user_query
             ),

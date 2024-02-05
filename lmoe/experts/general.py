@@ -1,4 +1,4 @@
-from lmoe.experts import expert_type
+from lmoe.api.base_expert import BaseExpert
 from string import Template
 
 import ollama
@@ -16,11 +16,25 @@ $user_query
 )
 
 
-class GeneralExpert:
+class General(BaseExpert):
 
-    @staticmethod
-    def expert_type():
-        return expert_type.ExpertType.GENERAL
+    @classmethod
+    def name(cls):
+        return "GENERAL"
+
+    @classmethod
+    def has_modelfile(cls):
+        return True
+
+    def description(self):
+        return "An all-purpose model, to be used if a question is asked which requires general knowledge, or if you cannot determine a more specific model that would be more appropriate."
+
+    def examples(self):
+        return [
+            "what is the last item in the list?",
+            "What are you?",
+            "What is the distance between Earth and Mars?",
+        ]
 
     def generate(self, user_context, user_query):
         stream = ollama.generate(

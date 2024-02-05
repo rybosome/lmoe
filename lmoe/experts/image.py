@@ -1,4 +1,4 @@
-from lmoe.experts import expert_type
+from lmoe.api.base_expert import BaseExpert
 from string import Template
 
 import ollama
@@ -16,7 +16,7 @@ $user_query
 )
 
 
-class ImageExpert:
+class Image(BaseExpert):
 
     @staticmethod
     def expert_type():
