@@ -1,8 +1,9 @@
 _REGISTRY = {}
 
 
-def add(expert):
-    _REGISTRY[expert.name()] = expert
+def register_experts(*args):
+    for arg in args:
+        _REGISTRY[arg.name()] = arg
 
 
 def keys():

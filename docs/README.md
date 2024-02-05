@@ -2,20 +2,20 @@
 
 <img src="https://rybosome.github.io/lmoe/assets/lmoe-armadillo.png">
 
-lmoe (pronounced "Elmo", a local Mixture of Experts) is a multimodal CLI assistant with a natural
+lmoe (layered mixture of experts, pronounced "Elmo") is a multimodal CLI assistant with a natural
 language interface.
 
-Running on Ollama and various open-weight models, lmoe is intended to be a convenient, low-overhead,
-low-configuration way to interact with AI models from the command line.
+Running on Ollama and various open-weight models, lmoe is a convenient, low-overhead,
+low-configuration way to interact with programmable AI models from the command line.
 
 ## Lmoe Armadillo
 
 The mascot and avatar for the project is Lmoe Armadillo, a Cyborg [Cingulata](https://en.wikipedia.org/wiki/Cingulata)
 who is ready to dig soil and do toil.
 
-## Examples
+## Capabilities
 
-lmoe has a natural language interface and no syntactic overhead or commands to remember.
+lmoe has a natural language interface.
 
 You will need to quote your strings if you want to use characters that are significant to your shell
 (like `?`).
@@ -78,18 +78,6 @@ Pipe it information from your computer and ask questions about it.
 ```
 
 ```
-% print -x 'hello'
-
-print: positive integer expected after -x: hello
-
-% echo 'print: positive integer expected after -x: hello' | lmoe 'why am I getting this error with the `print` shell command?'
-
- The `print` command in a Unix-like shell expects a positive integer as its argument to print that
- value to the console. You provided the string 'hello' instead, which is causing the error message
- you're seeing.
-```
-
-```
 % ls -la | lmoe how big is my zsh history
 
  The size of your Zsh history file is 16084 bytes.
@@ -97,89 +85,121 @@ print: positive integer expected after -x: hello
 
 #### Pasting context
 
-Let's copy the following code to the clipboard.
+Get an error message and copy it to the clipboard, then ask about it.
 
-```shell
-# Define the base directory for virtual environments
-VENVS_DIR="$HOME/.venvs"
+```
+% print -x 'hello'
+print: positive integer expected after -x: hello
 
-# Helper for manipulating Python virtual environments
-venv() {
-    if [[ $# -lt 1 ]]; then
-        echo "Usage: venv <command> [args]"
-        exit 1
-    fi
+% lmoe --paste how do I fix this error
+ To use the `-x` option with the `print` command in Bash, you need to provide a positional argument that is a file descriptor. Instead, you provided a string 'hello'. Here's how you can correctly use it:
 
-    command="$1"
-    shift
+1. Create or have a file with the name 'hello' and make sure it exists in your working directory.
+2. Run the following command instead: `print -r -- < hello`. This reads the contents of the file 'hello' as input for print, which displays its output to stdout.
+```
 
-    case "$command" in
-        mkdir)
-            if [[ $# -lt 1 ]]; then
-                echo "Usage: venv mkdir <env_name>"
-                exit 1
-            fi
-            python3 -m venv "$VENVS_DIR/$1"
-            ;;
-        ls)
-            ls "$VENVS_DIR"
-            ;;
-        rm)
-            if [[ $# -lt 1 ]]; then
-                echo "Usage: venv rm <env_name>"
-                exit 1
-            fi
-            echo "Do you want to remove $1? (y/n): \c"
-            read confirm
-            if [[ $confirm == "y" ]]; then
-                rm -rf "$VENVS_DIR/$1"
-            fi
-            ;;
-        activate)
-            if [ -z "$1" ]; then
-            . "$VENVS_DIR/default/bin/activate"
-            else
-            . "$VENVS_DIR/$1/bin/activate"
-            fi
-            ;;
-        *)
-            echo "Unknown command. Available commands: mkdir, ls, rm, activate"
-            exit 1
-            ;;
-    esac
-}
+### Project Generation
+
+Copying the above advice from `lmoe` on creating a Python Poetry project...
+
+```
+ With Poetry, a Python packaging and project management tool, a recommended layout for a Python
+ project could include the following structure:
+
+ myproject/
+ ├── pyproject.toml
+ ├── README.rst
+ ├── requirements.in
+ └── src/
+     ├── __init__.py
+     └── mypackage/
+         ├── __init__.py
+         ├── module1.py
+         └── module2.py
+
+In this layout, the `myproject/` directory contains the root-level project files. The
+`pyproject.toml` file is used for managing dependencies and building your Python package. The
+`README.rst` file is optional, but common, to include documentation about your project. The
+`requirements.in` file lists the external packages required by your project.
+
+The `src/` directory contains your source code for the project. In this example, there's a package
+named `mypackage`, which includes an `__init__.py` file and two modules: `module1.py` and
+`module2.py`.
+
+This is just one suggested layout using Poetry. Depending on your specific project requirements and
+preferences, the layout might vary. Always refer to the [Poetry documentation](https://python-poetry.org/)
+for more detailed information.
 ```
 
 ```
-% lmoe --paste what does this zsh script do
-
- This zsh script defines a function named `venv` that assists in managing Python virtual
- environments. It provides several subcommands: "mkdir" for creating new environments, "ls" for
- listing existing environments, "rm" for removing environments, and "activate" for activating an
- environment. The base directory for all virtual environments is set to `$HOME/.venvs`.
+% lmoe --paste "make a project like this for a module called 'alexandria' with 3 sub modules: 'auth', 'util', and 'io'"
+mkdir alexandria/
+touch alexandria/pyproject.toml
+touch alexandria/README.rst
+touch alexandria/requirements.in
+mkdir alexandria/src/
+touch alexandria/src/__init__.py
+mkdir alexandria/src/alexandria/
+touch alexandria/src/alexandria/__init__.py
+mkdir alexandria/src/alexandria/auth/
+touch alexandria/src/alexandria/auth/__init__.py
+mkdir alexandria/src/alexandria/util/
+touch alexandria/src/alexandria/util/__init__.py
+mkdir alexandria/src/alexandria/io/
+touch alexandria/src/alexandria/io/__init__.py
 ```
 
-### Code Generation
+Coming soon: the ability to dry-run this, see the intended commands, then execute it.
 
-Coming soon.
+## Extension Model
 
-### Images
+New capabilities can be added to `lmoe` with low overhead. Just implement
+`lmoe.api.base_expert.BaseExpert` and add your new expert to the registry in
+`lmoe/experts/__init__.py`. See existing experts for examples.
 
-Coming soon.
+## Commands
+
+`lmoe` supports command-like behavior (i.e. executing actions for and against itself).
+
+All of these are supported using the same extension model available to external developers.
+
+### Refresh
+
+Update local Ollama modelfiles. This should be run any time you add a new expert and modelfile, or
+alter a modelfile template.
+
+Note that all queries are examples of receiving the same output.
+
+```
+% lmoe refresh
+% lmoe update your models
+% lmoe refresh the models
+% lmoe update models
+
+Deleting existing lmoe_classifier...
+Updating lmoe_classifier...
+Deleting existing lmoe_code...
+Updating lmoe_code...
+Deleting existing lmoe_project_initialization...
+Updating lmoe_project_initialization...
+Deleting existing lmoe_general...
+Updating lmoe_general...
+```
 
 ## Status
 
-Version 0.1.01
+Version 0.1.2
 
-This is currently a very basic implementation which only supports a general expert, no
-configuration, does not automate environment setup, and does not have persistence.
+This is currently a very basic implementation which primarily supports a general expert, offers no
+configuration, has limited automation for environment setup, and does not have persistence.
 
-In the words of many a developer, "it runs fine on my machine" but is currently not intended for
-others' use.
+This is not yet ready for others' use.
 
 ### Upcoming features
 
-* integration with code and image models
-* self-setup (after installing with pip)
+* error handling
+* self-setup of models and ollama context after installation
 * persisted context (i.e. memory, chat-like experience without a formal chat interface)
 * configurability
+* tests
+* programmable interface
