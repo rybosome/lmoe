@@ -36,9 +36,9 @@ Finally, refresh the rest of the models.
 
 Further interaction wtih `lmoe` may cause Ollama to pull any models not present on your local machine.
 
-## Capabilities
+## Overview
 
-### Basic Querying
+### Natural language querying
 ```
 % lmoe who was matisse
 
@@ -48,40 +48,7 @@ Further interaction wtih `lmoe` may cause Ollama to pull any models not present 
  brushstrokes. His works include iconic paintings such as "The Joy of Life" and "Woman with a Hat."
 ```
 
-```
-% lmoe what is the recommended layout for a python project with poetry
-
- With Poetry, a Python packaging and project management tool, a recommended layout for a Python
- project could include the following structure:
-
- myproject/
- ├── pyproject.toml
- ├── README.rst
- ├── requirements.in
- └── src/
-     ├── __init__.py
-     └── mypackage/
-         ├── __init__.py
-         ├── module1.py
-         └── module2.py
-
-In this layout, the `myproject/` directory contains the root-level project files. The
-`pyproject.toml` file is used for managing dependencies and building your Python package. The
-`README.rst` file is optional, but common, to include documentation about your project. The
-`requirements.in` file lists the external packages required by your project.
-
-The `src/` directory contains your source code for the project. In this example, there's a package
-named `mypackage`, which includes an `__init__.py` file and two modules: `module1.py` and
-`module2.py`.
-
-This is just one suggested layout using Poetry. Depending on your specific project requirements and
-preferences, the layout might vary. Always refer to the [Poetry documentation](https://python-poetry.org/)
-for more detailed information.
-```
-
 ### Piping context
-
-Pipe it information from your computer and ask questions about it.
 
 ```
 % cat projects/lmoe/lmoe/main.py | lmoe what does this code do
@@ -94,41 +61,21 @@ Pipe it information from your computer and ask questions about it.
 ```
 
 ```
-% ls -la | lmoe how big is my zsh history
+% ls -la $HOME | lmoe how big is my zsh history
 
  The size of your Zsh history file is 16084 bytes.
 ```
 
-This can include context from `lmoe` -- sequencing outputs can be a powerful way to combine primitives into new functionality.
-
-```
-% lmoe what is the recommended layout for a python project with poetry |
-lmoe "make a project like this for a module called 'alexandria' with 3 sub modules: 'auth', 'util', and 'io'"
-
- mkdir alexandria/
- touch alexandria/pyproject.toml
- touch alexandria/README.rst
- touch alexandria/requirements.in
- mkdir alexandria/src/
- touch alexandria/src/__init__.py
- mkdir alexandria/src/alexandria/
- touch alexandria/src/alexandria/__init__.py
- mkdir alexandria/src/alexandria/auth/
- touch alexandria/src/alexandria/auth/__init__.py
- touch alexandria/src/alexandria/util/
- touch alexandria/src/alexandria/util/__init__.py
- touch alexandria/src/alexandria/io/
- touch alexandria/src/alexandria/io/__init__.py
-```
-
 ### Pasting context
-
-Get an error message and copy it to the clipboard, then ask about it.
 
 ```
 % print -x 'hello'
 print: positive integer expected after -x: hello
+```
 
+Copy this to the clipboard, then:
+
+```
 % lmoe --paste how do I fix this error
  To use the `-x` option with the `print` command in Bash, you need to provide a positional argument that is a file descriptor. Instead, you provided a string 'hello'. Here's how you can correctly use it:
 
@@ -136,17 +83,16 @@ print: positive integer expected after -x: hello
 2. Run the following command instead: `print -r -- < hello`. This reads the contents of the file 'hello' as input for print, which displays its output to stdout.
 ```
 
-### Commands
+## Capabilities
 
-`lmoe` supports command-like behavior.
+`lmoe` supports a number of specific functions beyond general LLM querying and instruction. All of
+these are implemented using the same extension model available to external developers.
 
-All of these commands are implemented using the same extension model available to external developers.
-
-Commands with multiple inputs listed are examples of different ways to activate the same command.
+Capabilities with multiple inputs listed are examples of different ways to activate it.
 
 #### Refresh
 
-Update local Ollama modelfiles.
+*Update local Ollama modelfiles.*
 
 This should be run any time you add a new expert, modelfile, or
 alter a modelfile template.
@@ -226,7 +172,7 @@ touch alexandria/src/alexandria/io/__init__.py
 
 Coming soon: `lmoe` will offer to run them for you, open them in an editor, or stop.
 
-### Model Listing
+#### Model Listing
 
 List Ollama metadata on models used internally by `lmoe`.
 
@@ -239,6 +185,31 @@ List Ollama metadata on models used internally by `lmoe`.
 {'name': 'lmoe_code:latest', 'model': 'lmoe_code:latest', 'modified_at': '2024-02-05T13:46:49.988112317-08:00', 'size': 4109866128, 'digest': 'f387ef329bc0ebd9df25dcc8c4f014bbbe127e6a543c8dfa992a805d71fbbb1e', 'details': {'parent_model': '', 'format': 'gguf', 'family': 'llama', 'families': ['llama'], 'parameter_size': '7B', 'quantization_level': 'Q4_0'}}
 {'name': 'lmoe_general:latest', 'model': 'lmoe_general:latest', 'modified_at': '2024-02-05T13:46:49.996594585-08:00', 'size': 4109867476, 'digest': '657788601d06890ac136d61bdecec9e3a8ebff4e9139c5cc0fbfa56377625d25', 'details': {'parent_model': '', 'format': 'gguf', 'family': 'llama', 'families': ['llama'], 'parameter_size': '7B', 'quantization_level': 'Q4_0'}}
 {'name': 'lmoe_project_initialization:latest', 'model': 'lmoe_project_initialization:latest', 'modified_at': '2024-02-05T13:46:49.991328433-08:00', 'size': 4109868075, 'digest': '9af2d395e8883910952bee2668d18131206fb5c612bc5d4a207b6637e1bc6907', 'details': {'parent_model': '', 'format': 'gguf', 'family': 'llama', 'families': ['llama'], 'parameter_size': '7B', 'quantization_level': 'Q4_0'}}
+```
+
+## Sequencing
+
+`lmoe` can be piped into itself. This allows scriptable composition of primitives into more advanced
+functionality.
+
+```
+% lmoe what is the recommended layout for a python project with poetry |
+lmoe "make a project like this for a module called 'alexandria' with 3 sub modules: 'auth', 'util', and 'io'"
+
+ mkdir alexandria/
+ touch alexandria/pyproject.toml
+ touch alexandria/README.rst
+ touch alexandria/requirements.in
+ mkdir alexandria/src/
+ touch alexandria/src/__init__.py
+ mkdir alexandria/src/alexandria/
+ touch alexandria/src/alexandria/__init__.py
+ mkdir alexandria/src/alexandria/auth/
+ touch alexandria/src/alexandria/auth/__init__.py
+ touch alexandria/src/alexandria/util/
+ touch alexandria/src/alexandria/util/__init__.py
+ touch alexandria/src/alexandria/io/
+ touch alexandria/src/alexandria/io/__init__.py
 ```
 
 ## Extension Model
