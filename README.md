@@ -115,11 +115,10 @@ Updating lmoe_general...
 
 #### Project Generation
 
-Generate a new programming project from an ascii or textual description.
-
-Copying previous output to the clipboard... 
+*Generate a new programming project from an ascii or textual description.*
 
 ```
+% lmoe what is the recommended layout for a python project with poetry
  With Poetry, a Python packaging and project management tool, a recommended layout for a Python
  project could include the following structure:
 
@@ -148,7 +147,7 @@ preferences, the layout might vary. Always refer to the [Poetry documentation](h
 for more detailed information.
 ```
 
-...and pasting it...
+Copy this to the clipboard, and then:
 
 ```
 % lmoe --paste "make a project like this for a module called 'alexandria' with 3 sub modules: 'auth', 'util', and 'io'"
@@ -168,13 +167,13 @@ mkdir alexandria/src/alexandria/io/
 touch alexandria/src/alexandria/io/__init__.py
 ```
 
-...will give you a list of runnable shell commands.
+...for a list of runnable shell commands.
 
 Coming soon: `lmoe` will offer to run them for you, open them in an editor, or stop.
 
 #### Model Listing
 
-List Ollama metadata on models used internally by `lmoe`.
+*List Ollama metadata on models used internally by `lmoe`.*
 
 ```
 % lmoe list
@@ -224,7 +223,7 @@ More to come soon as API finalizes.
 
 Version 0.1.2
 
-This is currently a very basic implementation which primarily supports a general expert, offers no
+This is currently a very basic implementation which mostly supports a general expert, offers no
 configuration, has limited automation for environment setup, and does not have persistence.
 
 This is not yet ready for others' use.
@@ -237,6 +236,8 @@ This is not yet ready for others' use.
 * configurability
 * tests
 * stable programmable interface
+* further tuning of classification, code generation, and project initialization
+* dry-run for mutating actions, ability to execute mutating actions
 * many more commands
   * filesystem interaction
     * fuzzy finding
