@@ -2,25 +2,43 @@
 
 <img src="https://rybosome.github.io/lmoe/assets/lmoe-armadillo.png">
 
-lmoe (layered mixture of experts, pronounced "Elmo") is a multimodal CLI assistant with a natural
-language interface.
+`lmoe` (Layered Mixture of Experts, pronounced "Elmo") is a programmable, multimodal CLI assistant
+with a natural language interface.
 
-Running on Ollama and various open-weight models, lmoe is a convenient, low-overhead,
-low-configuration way to interact with programmable AI models from the command line.
+Running on Ollama and various open-weight models, `lmoe` is a simple, yet powerful way to
+interact with highly configurable AI models from the command line.
 
 ## Lmoe Armadillo
 
-The mascot and avatar for the project is Lmoe Armadillo, a Cyborg [Cingulata](https://en.wikipedia.org/wiki/Cingulata)
-who is ready to dig soil and do toil.
+The avatar of `lmoe` is Lmoe Armadillo, a cybernetic [Cingulata](https://en.wikipedia.org/wiki/Cingulata)
+who is ready to dig soil and execute toil.
+
+## Setup
+
+You may wish to install `lmoe` in a virtual environment.
+
+```
+% pip install lmoe
+```
+
+Ensure that an Ollama server is running, then manually initialize the root classification model.
+
+```
+% lmoe --classifier_modelfile > temp-classifier-modelfile.txt
+% ollama create lmoe_classifier -f temp-classifier-modelfile.txt
+```
+
+Finally, refresh the rest of the models.
+
+```
+% lmoe refresh
+```
+
+Further interaction wtih `lmoe` may cause Ollama to pull any models not present on your local machine.
 
 ## Capabilities
 
-lmoe has a natural language interface.
-
-You will need to quote your strings if you want to use characters that are significant to your shell
-(like `?`).
-
-### Querying
+### Basic Querying
 ```
 % lmoe who was matisse
 
@@ -61,9 +79,7 @@ preferences, the layout might vary. Always refer to the [Poetry documentation](h
 for more detailed information.
 ```
 
-### Querying your context
-
-#### Piping context
+### Piping context
 
 Pipe it information from your computer and ask questions about it.
 
@@ -83,7 +99,29 @@ Pipe it information from your computer and ask questions about it.
  The size of your Zsh history file is 16084 bytes.
 ```
 
-#### Pasting context
+This can include context from `lmoe` -- sequencing outputs can be a powerful way to combine primitives into new functionality.
+
+```
+% lmoe what is the recommended layout for a python project with poetry |
+lmoe "make a project like this for a module called 'alexandria' with 3 sub modules: 'auth', 'util', and 'io'"
+
+ mkdir alexandria/
+ touch alexandria/pyproject.toml
+ touch alexandria/README.rst
+ touch alexandria/requirements.in
+ mkdir alexandria/src/
+ touch alexandria/src/__init__.py
+ mkdir alexandria/src/alexandria/
+ touch alexandria/src/alexandria/__init__.py
+ mkdir alexandria/src/alexandria/auth/
+ touch alexandria/src/alexandria/auth/__init__.py
+ touch alexandria/src/alexandria/util/
+ touch alexandria/src/alexandria/util/__init__.py
+ touch alexandria/src/alexandria/io/
+ touch alexandria/src/alexandria/io/__init__.py
+```
+
+### Pasting context
 
 Get an error message and copy it to the clipboard, then ask about it.
 
@@ -98,9 +136,42 @@ print: positive integer expected after -x: hello
 2. Run the following command instead: `print -r -- < hello`. This reads the contents of the file 'hello' as input for print, which displays its output to stdout.
 ```
 
-### Project Generation
+### Commands
 
-Copying the above advice from `lmoe` on creating a Python Poetry project...
+`lmoe` supports command-like behavior.
+
+All of these commands are implemented using the same extension model available to external developers.
+
+Commands with multiple inputs listed are examples of different ways to activate the same command.
+
+#### Refresh
+
+Update local Ollama modelfiles.
+
+This should be run any time you add a new expert, modelfile, or
+alter a modelfile template.
+
+```
+% lmoe refresh
+% lmoe update your models
+% lmoe refresh the models
+% lmoe update models
+
+Deleting existing lmoe_classifier...
+Updating lmoe_classifier...
+Deleting existing lmoe_code...
+Updating lmoe_code...
+Deleting existing lmoe_project_initialization...
+Updating lmoe_project_initialization...
+Deleting existing lmoe_general...
+Updating lmoe_general...
+```
+
+#### Project Generation
+
+Generate a new programming project from an ascii or textual description.
+
+Copying previous output to the clipboard... 
 
 ```
  With Poetry, a Python packaging and project management tool, a recommended layout for a Python
@@ -131,6 +202,8 @@ preferences, the layout might vary. Always refer to the [Poetry documentation](h
 for more detailed information.
 ```
 
+...and pasting it...
+
 ```
 % lmoe --paste "make a project like this for a module called 'alexandria' with 3 sub modules: 'auth', 'util', and 'io'"
 mkdir alexandria/
@@ -149,7 +222,24 @@ mkdir alexandria/src/alexandria/io/
 touch alexandria/src/alexandria/io/__init__.py
 ```
 
-Coming soon: the ability to dry-run this, see the intended commands, then execute it.
+...will give you a list of runnable shell commands.
+
+Coming soon: `lmoe` will offer to run them for you, open them in an editor, or stop.
+
+### Model Listing
+
+List Ollama metadata on models used internally by `lmoe`.
+
+```
+% lmoe list
+% lmoe what are your models
+% lmoe list your models
+
+{'name': 'lmoe_classifier:latest', 'model': 'lmoe_classifier:latest', 'modified_at': '2024-02-05T13:46:49.983916538-08:00', 'size': 4109868691, 'digest': '576c04e5f9c9e82b2ca14cfd5754ca56610619cddb737a6ca968d064c86bcb68', 'details': {'parent_model': '', 'format': 'gguf', 'family': 'llama', 'families': ['llama'], 'parameter_size': '7B', 'quantization_level': 'Q4_0'}}
+{'name': 'lmoe_code:latest', 'model': 'lmoe_code:latest', 'modified_at': '2024-02-05T13:46:49.988112317-08:00', 'size': 4109866128, 'digest': 'f387ef329bc0ebd9df25dcc8c4f014bbbe127e6a543c8dfa992a805d71fbbb1e', 'details': {'parent_model': '', 'format': 'gguf', 'family': 'llama', 'families': ['llama'], 'parameter_size': '7B', 'quantization_level': 'Q4_0'}}
+{'name': 'lmoe_general:latest', 'model': 'lmoe_general:latest', 'modified_at': '2024-02-05T13:46:49.996594585-08:00', 'size': 4109867476, 'digest': '657788601d06890ac136d61bdecec9e3a8ebff4e9139c5cc0fbfa56377625d25', 'details': {'parent_model': '', 'format': 'gguf', 'family': 'llama', 'families': ['llama'], 'parameter_size': '7B', 'quantization_level': 'Q4_0'}}
+{'name': 'lmoe_project_initialization:latest', 'model': 'lmoe_project_initialization:latest', 'modified_at': '2024-02-05T13:46:49.991328433-08:00', 'size': 4109868075, 'digest': '9af2d395e8883910952bee2668d18131206fb5c612bc5d4a207b6637e1bc6907', 'details': {'parent_model': '', 'format': 'gguf', 'family': 'llama', 'families': ['llama'], 'parameter_size': '7B', 'quantization_level': 'Q4_0'}}
+```
 
 ## Extension Model
 
@@ -157,34 +247,7 @@ New capabilities can be added to `lmoe` with low overhead. Just implement
 `lmoe.api.base_expert.BaseExpert` and add your new expert to the registry in
 `lmoe/experts/__init__.py`. See existing experts for examples.
 
-## Commands
-
-`lmoe` supports command-like behavior (i.e. executing actions for and against itself).
-
-All of these are supported using the same extension model available to external developers.
-
-### Refresh
-
-Update local Ollama modelfiles. This should be run any time you add a new expert and modelfile, or
-alter a modelfile template.
-
-Note that all queries are examples of receiving the same output.
-
-```
-% lmoe refresh
-% lmoe update your models
-% lmoe refresh the models
-% lmoe update models
-
-Deleting existing lmoe_classifier...
-Updating lmoe_classifier...
-Deleting existing lmoe_code...
-Updating lmoe_code...
-Deleting existing lmoe_project_initialization...
-Updating lmoe_project_initialization...
-Deleting existing lmoe_general...
-Updating lmoe_general...
-```
+More to come soon as API finalizes.
 
 ## Status
 
@@ -202,4 +265,14 @@ This is not yet ready for others' use.
 * persisted context (i.e. memory, chat-like experience without a formal chat interface)
 * configurability
 * tests
-* programmable interface
+* stable programmable interface
+* many more commands
+  * filesystem interaction
+    * fuzzy finding
+    * pulling out context
+  * helpers for existing bash commands
+    * awk
+    * curl
+  * API clients
+    * weather
+    * wikipedia
