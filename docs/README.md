@@ -8,11 +8,6 @@ with a natural language interface.
 Running on Ollama and various open-weight models, `lmoe` is a simple, yet powerful way to
 interact with highly configurable AI models from the command line.
 
-## Lmoe Armadillo
-
-The avatar of `lmoe` is Lmoe Armadillo, a cybernetic [Cingulata](https://en.wikipedia.org/wiki/Cingulata)
-who is ready to dig soil and execute toil.
-
 ## Setup
 
 You may wish to install `lmoe` in a virtual environment.
@@ -85,10 +80,18 @@ Copy this to the clipboard, then:
 
 ## Capabilities
 
-`lmoe` supports a number of specific functions beyond general LLM querying and instruction. All of
-these are implemented using the same extension model available to external developers.
+`lmoe` supports a number of specific functions beyond general LLM querying and instruction.
 
 Capabilities with multiple inputs listed are examples of different ways to activate it.
+
+### Image Recognition
+
+```
+% curl -sS 'https://rybosome.github.io/lmoe/assets/lmoe-armadillo.png' | base64 -i - | lmoe what is in this picture
+{"model":"llava","created_at":"2024-02-08T07:09:28.827507Z","response":" The image features a stylized, colorful creature that appears to be a combination of different animals. It has the body of a rat, with a prominent tail and ears, which is also typical of rats. The head resembles a cat, with pointy ears and what seems to be cat whiskers. The creature has eyes like those of a cat, and it's wearing a helmet or headgear that looks like an advanced robot with digital readouts on the forehead, giving it a cyberpunk aesthetic. The background is colorful with a rainbow pattern, enhancing the fantastical nature of the creature. This image is likely a piece of digital art designed to showcase imaginative and creative concepts. ","done":true,"context":[733,16289,28793,767,349,297,456,5754,733,28748,16289,28793,415,3469,4190,264,341,2951,1332,28725,3181,1007,15287,369,8045,298,347,264,9470,302,1581,8222,28723,661,659,272,2187,302,264,6172,28725,395,264,15574,8675,304,12446,28725,690,349,835,10842,302,408,1449,28723,415,1335,312,5650,867,264,5255,28725,395,1305,28724,12446,304,767,3969,298,347,5255,26898,404,28723,415,15287,659,2282,737,1395,302,264,5255,28725,304,378,28742,28713,8192,264,26371,442,1335,490,283,369,4674,737,396,10023,18401,395,7153,1220,8508,356,272,18522,28725,5239,378,264,23449,28720,2060,27974,28723,415,5414,349,3181,1007,395,264,7296,11809,5340,28725,8050,7161,272,7399,529,745,4735,302,272,15287,28723,851,3469,349,3917,264,5511,302,7153,1524,5682,298,1347,2210,26671,1197,304,9811,16582,28723,28705],"total_duration":7148311208,"load_duration":2687336958,"prompt_eval_count":1,"prompt_eval_duration":1313448000,"eval_count":151,"eval_duration":3111945000}
+```
+
+### Utilities
 
 #### Refresh
 
@@ -213,38 +216,52 @@ lmoe "make a project like this for a module called 'alexandria' with 3 sub modul
 
 ## Extension Model
 
-New capabilities can be added to `lmoe` with low overhead. Just implement
-`lmoe.api.base_expert.BaseExpert` and add your new expert to the registry in
+New capabilities can be added to `lmoe` with low overhead. All capabilities, internal and
+user-defined, are implemented with the same programming model.
+
+Just implement `lmoe.api.base_expert.BaseExpert` and add your new expert to the registry in
 `lmoe/experts/__init__.py`. See existing experts for examples.
 
-More to come soon as API finalizes.
+More to come as API finalizes - moving to dependency injection in the next update.
 
 ## Status
 
-Version 0.1.2
+Version 0.2.0
 
-This is currently a very basic implementation which mostly supports a general expert, offers no
-configuration, has limited automation for environment setup, and does not have persistence.
+This is currently a very basic implementation.
+
+Supports a general expert and image recognition.
+
+Not configurable, limited automation for environment setup, and does not have persistence.
 
 This is not yet ready for others' use.
 
 ### Upcoming features
 
+* dependency injection
 * error handling
 * self-setup of models and ollama context after installation
 * persisted context (i.e. memory, chat-like experience without a formal chat interface)
 * configurability
 * tests
-* stable programmable interface
 * further tuning of classification, code generation, and project initialization
 * dry-run for mutating actions, ability to execute mutating actions
 * many more commands
   * filesystem interaction
-    * fuzzy finding
-    * pulling out context
-  * helpers for existing bash commands
+    * finding file contents from various queries (specific file path, fuzzy description, "this directory", etc.)
+  * executors for existing bash commands
     * awk
     * curl
   * API clients
     * weather
     * wikipedia
+
+## Lmoe Armadillo
+
+<img src="https://rybosome.github.io/lmoe/assets/lmoe-armadillo.jpg">
+
+The avatar of `lmoe` is Lmoe Armadillo, a cybernetic [Cingulata](https://en.wikipedia.org/wiki/Cingulata)
+who is ready to dig soil and execute toil.
+
+<img src="https://rybosome.github.io/lmoe/assets/lmoe-armadillo-alt1.jpg">
+<img src="https://rybosome.github.io/lmoe/assets/lmoe-armadillo-alt2.jpg">
