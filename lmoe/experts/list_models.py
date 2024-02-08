@@ -1,4 +1,5 @@
 from lmoe.api.base_expert import BaseExpert
+from lmoe.api.lmoe_query import LmoeQuery
 
 import ollama
 
@@ -26,8 +27,8 @@ class ListModels(BaseExpert):
             "what models are you using?",
         ]
 
-    def generate(self, user_context, user_query):
+    def generate(self, lmoe_query: LmoeQuery):
         response = ollama.list()
-        for model in response['models']:
-            if model['name'].startswith('lmoe'):
+        for model in response["models"]:
+            if model["name"].startswith("lmoe"):
                 print(model)

@@ -1,5 +1,6 @@
 from lmoe.experts.classifier import Classifier
 from lmoe.experts.code import Code
+from lmoe.experts.image import Image
 from lmoe.experts.list_models import ListModels
 from lmoe.experts.refresh import Refresh
 from lmoe.experts.project_initialization import ProjectInitialization
@@ -13,5 +14,6 @@ register_experts(
     ListModels(),
     Refresh(),
     ProjectInitialization(),
+    Image(),
     General(),
 )

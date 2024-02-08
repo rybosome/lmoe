@@ -1,6 +1,7 @@
 from string import Template
 
 from lmoe.api.base_expert import BaseExpert
+from lmoe.api.lmoe_query import LmoeQuery
 from lmoe.framework import expert_registry
 
 import ollama
@@ -28,7 +29,7 @@ class Refresh(BaseExpert):
             "update models",
         ]
 
-    def generate(self, user_context, user_query):
+    def generate(self, lmoe_query:LmoeQuery):
         response = ollama.list()
         existing_model_names = [
             model["name"].split(":")[0] for model in response["models"]

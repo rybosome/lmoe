@@ -43,7 +43,7 @@ class Classifier(BaseExpert):
 
     def examples(self):
         example_queries = []
-        for e in get_non_self_experts():
+        for e in self.get_non_self_experts():
             example_queries.extend(e.examples())
         return example_queries
 
@@ -89,10 +89,6 @@ class Classifier(BaseExpert):
         )
         expert_name = self._parse(response["response"])
         return expert_registry.get_expert(expert_name)
-
-    def _remove_escape_characters(self, input_string):
-        escaped_bytes = bytes(input_string, "utf-8").decode("unicode_escape")
-        return escaped_bytes
 
     def _parse(self, model_response):
         unescaped_model_response = model_response.replace(r"\_", "_")

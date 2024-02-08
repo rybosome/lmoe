@@ -1,19 +1,7 @@
 from lmoe.api.base_expert import BaseExpert
-from string import Template
+from lmoe.api.lmoe_query import LmoeQuery
 
 import ollama
-
-_PROMPT_TEMPLATE = Template(
-    """
-===user-context===
-$user_context
-===user-context===
-===user-query===
-$user_query
-===user-query===
--response-
-"""
-)
 
 
 class ProjectInitialization(BaseExpert):
@@ -37,12 +25,10 @@ class ProjectInitialization(BaseExpert):
             "make a project like this one",
         ]
 
-    def generate(self, user_context, user_query):
+    def generate(self, lmoe_query: LmoeQuery):
         stream = ollama.generate(
             model="lmoe_project_initialization",
-            prompt=_PROMPT_TEMPLATE.substitute(
-                user_context=user_context, user_query=user_query
-            ),
+            prompt=lmoe_query.render(),
             stream=True,
         )
         for chunk in stream:

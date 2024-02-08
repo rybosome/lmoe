@@ -1,6 +1,8 @@
+from lmoe.api.lmoe_query import LmoeQuery
 from lmoe.experts.classifier import Classifier
 from lmoe.experts.refresh import Refresh
 from lmoe.framework import expert_registry
+from typing import Optional
 
 import argparse
 import pyperclip
@@ -11,10 +13,13 @@ def run():
     parser = argparse.ArgumentParser(
         description="Provide optional context for a query to lmoe through STDIN or the clipboard, then ask a question about it."
     )
-    parser.add_argument("query", nargs="*", default=None, help="Query for lmoe")
+    parser.add_argument("query", nargs="*", default=None, help="Query for lmoe. Use natural language.")
+
     parser.add_argument(
-        "--paste", action="store_true", help="Read content from the clipboard."
+        "--paste", action="store_true", help="Add context to your query from the system clipboard."
     )
+
+    ## Debug flags
     parser.add_argument(
         "--classify",
         action="store_true",
@@ -34,24 +39,36 @@ def run():
     user_query = " ".join(args.query)
     classifier = expert_registry.get_expert(Classifier.name())
 
+    ## Debug options
+
+    ##
+    ## Classify a query, print the expert which would respond to it.
     if args.classify:
         target_expert = classifier.classify(user_query)
         print(target_expert.name())
         print("")
-    elif args.classifier_modelfile:
+        exit(0)
+
+    ##
+    ## Print the contents of the classifier modelfile. Used to bootstrap lmoe.
+    if args.classifier_modelfile:
         print(classifier.modelfile_contents())
-    elif args.refresh:
+        exit(0)
+
+    ##
+    ## Refreshes the modelfiles with Ollama.
+    if args.refresh:
         expert_registry.get_expert(Refresh.name()).generate("", "")
-    else:
-        print("")
-        user_context = ""
-        target_expert = classifier.classify(user_query)
+        exit(0)
 
-        # Check if there is context on STDIN or the clipboard
-        if not sys.stdin.isatty():
-            user_context = sys.stdin.read()
-        elif args.paste:
-            if clipboard_content := pyperclip.paste():
-                user_context = clipboard_content
+    stdin_context: Optional[str] = None
+    if not sys.stdin.isatty():
+        stdin_context = sys.stdin.read()
 
-        target_expert.generate(user_context, user_query)
+    paste_context: Optional[str] = None
+    if args.paste:
+        if clipboard_content := pyperclip.paste():
+            paste_context = clipboard_content
+
+    target_expert = classifier.classify(user_query)
+    target_expert.generate(LmoeQuery(stdin_context, paste_context, user_query))

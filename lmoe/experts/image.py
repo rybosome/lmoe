@@ -1,36 +1,82 @@
 from lmoe.api.base_expert import BaseExpert
-from string import Template
+from lmoe.api.lmoe_query import LmoeQuery
 
+import base64
+import binascii
 import ollama
+import re
+import requests
 
-_PROMPT_TEMPLATE = Template(
-    """
-===user-context===
-$user_context
-===user-context===
-===user-query===
-$user_query
-===user-query===
--response-
-"""
-)
+
+def extract_base64(input_string):
+    # Use regular expression to extract Base64 data
+    match = re.search(r"\s*(user_context:)?\s*([A-Za-z0-9+/]+={0,2})", input_string)
+    if match:
+        base64_data = match.group(2)
+        # Remove whitespace and padding characters
+        base64_data = base64_data.replace(r"[A-Za-z0-9+/=]", "")
+        # Add padding if necessary
+        while len(base64_data) % 4 != 0:
+            base64_data += "="
+        return base64_data
+    else:
+        return None
+
+
+def check_base64(s):
+    try:
+        if not s.isascii():
+            print("s is not ascii")
+            return False
+        decoded_bytes = base64.standard_b64decode(s)
+        decoded_string = base64.standard_b64encode(decoded_bytes)
+        return True
+    except Exception as e:
+        print(e)
+        return False
 
 
 class Image(BaseExpert):
 
-    @staticmethod
-    def expert_type():
-        return expert_type.ExpertType.IMAGE
+    @classmethod
+    def name(cls):
+        return "IMAGE"
 
-    def generate(self, user_context, user_query):
-        stream = ollama.generate(
-            model="lmoe_general",
-            prompt=_PROMPT_TEMPLATE.substitute(
-                user_context=user_context, user_query=user_query
-            ),
-            stream=True,
-        )
-        for chunk in stream:
-            if chunk["response"] or not chunk["done"]:
-                print(chunk["response"], end="", flush=True)
-        print("")
+    @classmethod
+    def has_modelfile(cls):
+        return True
+
+    def description(self):
+        return "Analyzes the contents of images and answers questions about them."
+
+    def examples(self):
+        return [
+            "what's in this picture",
+            "what's in this iamge",
+            "how many people are in this picture",
+            "where was this picture taken",
+        ]
+
+    def generate(self, lmoe_query: LmoeQuery):
+        # TODO: Have a good way to get image context (interpret base64 context, then just from filename)
+        extracted_base64 = extract_base64(lmoe_query.stdin_context)
+        if not check_base64(extracted_base64):
+            print("bad base64")
+            exit(1)
+
+        # TODO: Ollama client for this is not working but raw HTTP calls are currently. Open a bug.
+        # TODO: replace with a more general ollama client allowing configuration?
+        # TODO: extract JSON, support streaming
+        try:
+            response = requests.post(
+                "http://127.0.0.1:11434/api/generate",
+                json={
+                    "model": "llava",
+                    "prompt": lmoe_query.user_query,
+                    "stream": False,
+                    "images": [extracted_base64],
+                },
+            )
+            print(response.text)
+        except requests.RequestException as e:
+            print("Error:", e)

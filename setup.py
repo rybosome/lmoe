@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-from lmoe.experts.expert_registry import get_all_modelfile_names
+from lmoe.framework.expert_registry import get_all_modelfile_names
 
 setup(
     name="lmoe",
