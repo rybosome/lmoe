@@ -286,7 +286,7 @@ This is not yet ready for others' use.
 The avatar of `lmoe` is Lmoe Armadillo, a cybernetic [Cingulata](https://en.wikipedia.org/wiki/Cingulata)
 who is ready to dig soil and execute toil.
 
-`lmoe` is a curious critter who takes many different manifestations.
+Lmoe Armadillo is a curious critter who assumes many different manifestations.
 
 ![Lmoe's default avatar against a lit background](https://rybosome.github.io/lmoe/assets/lmoe-armadillo-alt4-400px.jpg)
 ![An alternative Lmoe with a cute face](https://rybosome.github.io/lmoe/assets/lmoe-armadillo-alt1-400px.jpg)
