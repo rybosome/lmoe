@@ -78,11 +78,36 @@ Copy this to the clipboard, then:
 2. Run the following command instead: `print -r -- < hello`. This reads the contents of the file 'hello' as input for print, which displays its output to stdout.
 ```
 
+### Sequencing
+
+`lmoe` can be piped into itself. This allows scriptable composition of primitives into more advanced
+functionality.
+
+```
+% lmoe what is the recommended layout for a python project with poetry |
+lmoe "make a project like this for a module called 'alexandria' with 3 sub modules: 'auth', 'util', and 'io'"
+
+ mkdir alexandria/
+ touch alexandria/pyproject.toml
+ touch alexandria/README.rst
+ touch alexandria/requirements.in
+ mkdir alexandria/src/
+ touch alexandria/src/__init__.py
+ mkdir alexandria/src/alexandria/
+ touch alexandria/src/alexandria/__init__.py
+ mkdir alexandria/src/alexandria/auth/
+ touch alexandria/src/alexandria/auth/__init__.py
+ touch alexandria/src/alexandria/util/
+ touch alexandria/src/alexandria/util/__init__.py
+ touch alexandria/src/alexandria/io/
+ touch alexandria/src/alexandria/io/__init__.py
+```
+
 ## Capabilities
 
 `lmoe` supports a number of specific functions beyond general LLM querying and instruction.
 
-Capabilities with multiple inputs listed are examples of different ways to activate it.
+More coming soon.
 
 ### Image Recognition
 
@@ -112,32 +137,7 @@ This is `lmoe`'s first attempt to describe its default [avatar](#lmoe-armadillo)
     "eval_duration":3111945000}
 ```
 
-### Utilities
-
-#### Refresh
-
-*Update local Ollama modelfiles.*
-
-This should be run any time you add a new expert, modelfile, or
-alter a modelfile template.
-
-```
-% lmoe refresh
-% lmoe update your models
-% lmoe refresh the models
-% lmoe update models
-
-Deleting existing lmoe_classifier...
-Updating lmoe_classifier...
-Deleting existing lmoe_code...
-Updating lmoe_code...
-Deleting existing lmoe_project_initialization...
-Updating lmoe_project_initialization...
-Deleting existing lmoe_general...
-Updating lmoe_general...
-```
-
-#### Project Generation
+### Project Generation
 
 *Generate a new programming project from an ascii or textual description.*
 
@@ -195,6 +195,33 @@ touch alexandria/src/alexandria/io/__init__.py
 
 Coming soon: `lmoe` will offer to run them for you, open them in an editor, or stop.
 
+### Utilities
+
+Capabilities with multiple inputs listed are examples of different ways to activate it.
+
+#### Refresh
+
+*Update local Ollama modelfiles.*
+
+This should be run any time you add a new expert, modelfile, or
+alter a modelfile template.
+
+```
+% lmoe refresh
+% lmoe update your models
+% lmoe refresh the models
+% lmoe update models
+
+Deleting existing lmoe_classifier...
+Updating lmoe_classifier...
+Deleting existing lmoe_code...
+Updating lmoe_code...
+Deleting existing lmoe_project_initialization...
+Updating lmoe_project_initialization...
+Deleting existing lmoe_general...
+Updating lmoe_general...
+```
+
 #### Model Listing
 
 *List Ollama metadata on models used internally by `lmoe`.*
@@ -210,37 +237,12 @@ Coming soon: `lmoe` will offer to run them for you, open them in an editor, or s
 {'name': 'lmoe_project_initialization:latest', 'model': 'lmoe_project_initialization:latest', 'modified_at': '2024-02-05T13:46:49.991328433-08:00', 'size': 4109868075, 'digest': '9af2d395e8883910952bee2668d18131206fb5c612bc5d4a207b6637e1bc6907', 'details': {'parent_model': '', 'format': 'gguf', 'family': 'llama', 'families': ['llama'], 'parameter_size': '7B', 'quantization_level': 'Q4_0'}}
 ```
 
-## Sequencing
-
-`lmoe` can be piped into itself. This allows scriptable composition of primitives into more advanced
-functionality.
-
-```
-% lmoe what is the recommended layout for a python project with poetry |
-lmoe "make a project like this for a module called 'alexandria' with 3 sub modules: 'auth', 'util', and 'io'"
-
- mkdir alexandria/
- touch alexandria/pyproject.toml
- touch alexandria/README.rst
- touch alexandria/requirements.in
- mkdir alexandria/src/
- touch alexandria/src/__init__.py
- mkdir alexandria/src/alexandria/
- touch alexandria/src/alexandria/__init__.py
- mkdir alexandria/src/alexandria/auth/
- touch alexandria/src/alexandria/auth/__init__.py
- touch alexandria/src/alexandria/util/
- touch alexandria/src/alexandria/util/__init__.py
- touch alexandria/src/alexandria/io/
- touch alexandria/src/alexandria/io/__init__.py
-```
-
 ## Extension Model
 
 New capabilities can be added to `lmoe` with low overhead. All capabilities, internal and
 user-defined, are implemented with the same programming model.
 
-Just implement `lmoe.api.base_expert.BaseExpert` and add your new expert to the registry in
+Just implement [lmoe.api.base_expert.BaseExpert](https://github.com/rybosome/lmoe/blob/main/lmoe/api/base_expert.py) and add your new expert to the registry in
 `lmoe/experts/__init__.py`. See existing experts for examples.
 
 More to come as API finalizes - moving to dependency injection in the next update.
@@ -286,7 +288,7 @@ who is ready to dig soil and execute toil.
 
 `lmoe` is a curious critter who takes many different manifestations.
 
-![An alternative Lmoe with a cute face](https://rybosome.github.io/lmoe/assets/lmoe-armadillo-alt1-400px.jpg)
-![A realistic Lmoe Armadillo against a surrealist backdrop](https://rybosome.github.io/lmoe/assets/lmoe-armadillo-alt2-400px.jpg)
-![A blue-nosed Lmoe Armadillo](https://rybosome.github.io/lmoe/assets/lmoe-armadillo-alt3-400px.jpg)
 ![Lmoe's default avatar against a lit background](https://rybosome.github.io/lmoe/assets/lmoe-armadillo-alt4-400px.jpg)
+![An alternative Lmoe with a cute face](https://rybosome.github.io/lmoe/assets/lmoe-armadillo-alt1-400px.jpg)
+![A blue-nosed Lmoe Armadillo](https://rybosome.github.io/lmoe/assets/lmoe-armadillo-alt3-400px.jpg)
+![A realistic Lmoe Armadillo against a surrealist backdrop](https://rybosome.github.io/lmoe/assets/lmoe-armadillo-alt2-400px.jpg)
