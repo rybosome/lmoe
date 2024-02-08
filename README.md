@@ -286,7 +286,7 @@ who is ready to dig soil and execute toil.
 
 `lmoe` is a curious critter who takes many different manifestations.
 
-![Lmoe Armadillo against a dark background](https://rybosome.github.io/lmoe/assets/lmoe-armadillo-dark-bg-400px.jpg)
 ![An alternative Lmoe with a cute face](https://rybosome.github.io/lmoe/assets/lmoe-armadillo-alt1-400px.jpg)
 ![A realistic Lmoe Armadillo against a surrealist backdrop](https://rybosome.github.io/lmoe/assets/lmoe-armadillo-alt2-400px.jpg)
 ![A blue-nosed Lmoe Armadillo](https://rybosome.github.io/lmoe/assets/lmoe-armadillo-alt3-400px.jpg)
+![Lmoe's default avatar against a lit background](https://rybosome.github.io/lmoe/assets/lmoe-armadillo-alt4-400px.jpg)
