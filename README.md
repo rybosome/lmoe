@@ -249,7 +249,7 @@ More to come as API finalizes - moving to dependency injection in the next updat
 
 ## Status
 
-Version 0.2.1
+Version 0.2.2
 
 This is currently a very basic implementation.
 
