@@ -258,10 +258,10 @@ This is not yet ready for others' use.
 
 ## Lmoe Armadillo
 
-<img src="https://rybosome.github.io/lmoe/assets/lmoe-armadillo.jpeg">
+<img src="https://rybosome.github.io/lmoe/assets/lmoe-armadillo.jpg">
 
 The avatar of `lmoe` is Lmoe Armadillo, a cybernetic [Cingulata](https://en.wikipedia.org/wiki/Cingulata)
 who is ready to dig soil and execute toil.
 
-<img src="https://rybosome.github.io/lmoe/assets/lmoe-armadillo-alt1.jpeg">
-<img src="https://rybosome.github.io/lmoe/assets/lmoe-armadillo-alt2.jpeg">
+<img src="https://rybosome.github.io/lmoe/assets/lmoe-armadillo-alt1.jpg">
+<img src="https://rybosome.github.io/lmoe/assets/lmoe-armadillo-alt2.jpg">
