@@ -289,3 +289,4 @@ who is ready to dig soil and execute toil.
 ![Lmoe Armadillo against a dark background](https://rybosome.github.io/lmoe/assets/lmoe-armadillo-dark-bg-415px.jpg)
 ![An alternative Lmoe with a cute face](https://rybosome.github.io/lmoe/assets/lmoe-armadillo-alt1-415px.jpg)
 ![A realistic Lmoe Armadillo against a surrealist backdrop](https://rybosome.github.io/lmoe/assets/lmoe-armadillo-alt2-415px.jpg)
+![A blue-nosed Lmoe Armadillo](https://rybosome.github.io/lmoe/assets/lmoe-armadillo-alt3-415px.jpg)
