@@ -113,7 +113,7 @@ More coming soon.
 
 **Note**: currently this is raw, unparsed JSON output. Edited by hand for clarity in reading.
 
-This is `lmoe`'s first attempt to describe its default [avatar](#lmoe-armadillo).
+This is `lmoe`'s first attempt to describe its default avatar.
 
 ```
 % curl -sS 'https://rybosome.github.io/lmoe/assets/lmoe-armadillo.png' | base64 -i - | lmoe what is in this picture
@@ -278,8 +278,6 @@ This is not yet ready for others' use.
   * API clients
     * weather
     * wikipedia
-
-<a id="lmoe-armadillo">
 
 ## Lmoe Armadillo
 
