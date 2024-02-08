@@ -86,9 +86,30 @@ Capabilities with multiple inputs listed are examples of different ways to activ
 
 ### Image Recognition
 
+**Note**: currently this is raw, unparsed JSON output. Edited by hand for clarity in reading.
+
+This is `lmoe`'s first attempt to describe its default [avatar](#lmoe-armadillo).
+
 ```
 % curl -sS 'https://rybosome.github.io/lmoe/assets/lmoe-armadillo.png' | base64 -i - | lmoe what is in this picture
-{"model":"llava","created_at":"2024-02-08T07:09:28.827507Z","response":" The image features a stylized, colorful creature that appears to be a combination of different animals. It has the body of a rat, with a prominent tail and ears, which is also typical of rats. The head resembles a cat, with pointy ears and what seems to be cat whiskers. The creature has eyes like those of a cat, and it's wearing a helmet or headgear that looks like an advanced robot with digital readouts on the forehead, giving it a cyberpunk aesthetic. The background is colorful with a rainbow pattern, enhancing the fantastical nature of the creature. This image is likely a piece of digital art designed to showcase imaginative and creative concepts. ","done":true,"context":[733,16289,28793,767,349,297,456,5754,733,28748,16289,28793,415,3469,4190,264,341,2951,1332,28725,3181,1007,15287,369,8045,298,347,264,9470,302,1581,8222,28723,661,659,272,2187,302,264,6172,28725,395,264,15574,8675,304,12446,28725,690,349,835,10842,302,408,1449,28723,415,1335,312,5650,867,264,5255,28725,395,1305,28724,12446,304,767,3969,298,347,5255,26898,404,28723,415,15287,659,2282,737,1395,302,264,5255,28725,304,378,28742,28713,8192,264,26371,442,1335,490,283,369,4674,737,396,10023,18401,395,7153,1220,8508,356,272,18522,28725,5239,378,264,23449,28720,2060,27974,28723,415,5414,349,3181,1007,395,264,7296,11809,5340,28725,8050,7161,272,7399,529,745,4735,302,272,15287,28723,851,3469,349,3917,264,5511,302,7153,1524,5682,298,1347,2210,26671,1197,304,9811,16582,28723,28705],"total_duration":7148311208,"load_duration":2687336958,"prompt_eval_count":1,"prompt_eval_duration":1313448000,"eval_count":151,"eval_duration":3111945000}
+{
+    "model":"llava",
+    "created_at":"2024-02-08T07:09:28.827507Z",
+    "response":" The image features a stylized, colorful creature that appears to be a combination
+                 of different animals. It has the body of a rat, with a prominent tail and ears,
+                 which is also typical of rats. The head resembles a cat, with pointy ears and what
+                 seems to be cat whiskers. The creature has eyes like those of a cat, and it's
+                 wearing a helmet or headgear that looks like an advanced robot with digital
+                 readouts on the forehead, giving it a cyberpunk aesthetic. The background is
+                 colorful with a rainbow pattern, enhancing the fantastical nature of the creature.
+                 This image is likely a piece of digital art designed to showcase imaginative and
+                 creative concepts. ",
+    "done":true,
+    "context":[733,16289,28793,767,349,297,456,5754,733,28748,16289,28793,415,3469,4190,264,341,2951,1332,28725,3181,1007,15287,369,8045,298,347,264,9470,302,1581,8222,28723,661,659,272,2187,302,264,6172,28725,395,264,15574,8675,304,12446,28725,690,349,835,10842,302,408,1449,28723,415,1335,312,5650,867,264,5255,28725,395,1305,28724,12446,304,767,3969,298,347,5255,26898,404,28723,415,15287,659,2282,737,1395,302,264,5255,28725,304,378,28742,28713,8192,264,26371,442,1335,490,283,369,4674,737,396,10023,18401,395,7153,1220,8508,356,272,18522,28725,5239,378,264,23449,28720,2060,27974,28723,415,5414,349,3181,1007,395,264,7296,11809,5340,28725,8050,7161,272,7399,529,745,4735,302,272,15287,28723,851,3469,349,3917,264,5511,302,7153,1524,5682,298,1347,2210,26671,1197,304,9811,16582,28723,28705],"total_duration":7148311208,"load_duration":2687336958,
+    "prompt_eval_count":1,
+    "prompt_eval_duration":1313448000,
+    "eval_count":151,
+    "eval_duration":3111945000}
 ```
 
 ### Utilities
@@ -256,12 +277,15 @@ This is not yet ready for others' use.
     * weather
     * wikipedia
 
-## Lmoe Armadillo
+<a id="lmoe-armadillo">
 
-<img src="https://rybosome.github.io/lmoe/assets/lmoe-armadillo.jpg">
+## Lmoe Armadillo
 
 The avatar of `lmoe` is Lmoe Armadillo, a cybernetic [Cingulata](https://en.wikipedia.org/wiki/Cingulata)
 who is ready to dig soil and execute toil.
 
-<img src="https://rybosome.github.io/lmoe/assets/lmoe-armadillo-alt1.jpg">
-<img src="https://rybosome.github.io/lmoe/assets/lmoe-armadillo-alt2.jpg">
+`lmoe` is a curious critter who takes many different manifestations.
+
+![Lmoe Armadillo against a dark background](https://rybosome.github.io/lmoe/assets/lmoe-armadillo-dark-bg-415px.jpg)
+![An alternative Lmoe with a cute face](https://rybosome.github.io/lmoe/assets/lmoe-armadillo-alt1-415px.jpg)
+![A realistic Lmoe Armadillo against a surrealist backdrop](https://rybosome.github.io/lmoe/assets/lmoe-armadillo-alt2-415px.jpg)
