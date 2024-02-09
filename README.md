@@ -111,9 +111,11 @@ More coming soon.
 
 ### Image Recognition
 
-**Note**: currently this is raw, unparsed JSON output. Edited by hand for clarity in reading.
+*Describe the contents of an image*
 
 This is `lmoe`'s first attempt to describe its default avatar.
+
+**Note**: currently this is raw, unparsed JSON output. Edited by hand for readability.
 
 ```
 % curl -sS 'https://rybosome.github.io/lmoe/assets/lmoe-armadillo.png' | base64 -i - | lmoe what is in this picture
@@ -242,26 +244,188 @@ Updating lmoe_general...
 New capabilities can be added to `lmoe` with low overhead. All capabilities, internal and
 user-defined, are implemented with the same programming model.
 
-Just implement [lmoe.api.base_expert.BaseExpert](https://github.com/rybosome/lmoe/blob/main/lmoe/api/base_expert.py) and add your new expert to the registry in
-`lmoe/experts/__init__.py`. See existing experts for examples.
+To get started, create a directory structure like this:
 
-More to come as API finalizes - moving to dependency injection in the next update.
+```
+% mkdir -p "$HOME/lmoe_plugins/lmoe_plugins"
+```
+
+### Adding a new expert
+
+Create a new file under `$HOME/lmoe_plugins/lmoe_plugins/say_hi.py`.
+
+```python
+from lmoe.api.base_expert import BaseExpert
+from lmoe.api.lmoe_query import LmoeQuery
+from lmoe.framework.expert_registry import expert
+
+
+@expert
+class SayHi(BaseExpert):
+
+    @classmethod
+    def name(cls):
+        return "SAY_HI"
+
+    @classmethod
+    def has_modelfile(cls):
+        return False
+
+    def description(self):
+        return "Returns a friendly greeting from lmoe."
+
+    def examples(self):
+        return [
+            "say hello",
+            "introduce yourself",
+        ]
+
+    def generate(self, lmoe_query: LmoeQuery):
+        print("Hello from a plugin!")
+```
+
+Refresh `lmoe` and try your new command out!
+
+```
+% lmoe refresh
+...
+% lmoe say hi
+Hello from a plugin!
+```
+
+### Overriding a native expert
+
+Let's override the `GENERAL` expert with a less helpful variant.
+
+```
+% lmoe --classify why is the sky blue
+GENERAL
+% lmoe why is the sky blue
+The scattering of sunlight in the atmosphere causes the sky to appear blue. This occurs because
+shorter wavelengths of light, such as blue and violet, are more likely to be scattered than longer
+wavelengths, like red or orange. As a result, the sky predominantly reflects and scatters blue
+light, making it appear blue during a clear day.
+```
+
+Start by creating your new expert under `$HOME/lmoe_plugins/lmoe_plugins/general_rude.py`, and
+inherit from the base expert you wish to override.
+
+```python
+from lmoe.api.lmoe_query import LmoeQuery
+from lmoe.experts.general import General
+from lmoe.framework.expert_registry import expert
+
+
+@expert
+class GeneralRude(General):
+
+    @classmethod
+    def has_modelfile(cls):
+        return False
+
+    def generate(self, lmoe_query: LmoeQuery):
+        print("I'm not going to dignify that with a response.")
+```
+
+Refresh `lmoe` and try it out!
+
+```
+% lmoe refresh
+...
+% lmoe --classify why is the sky blue
+GENERAL
+% lmoe why is the sky blue
+I'm not going to dignify that with a response.
+```
+
+### Depending on natively provided dependencies
+
+If you'd like to add commands which depend on existing experts or other core elements of the `lmoe`
+framework, you can do so.
+
+This relies on the [injector](https://pypi.org/project/injector/) framework.
+
+First, create a new expert under `$HOME/lmoe_plugins/lmoe_plugins/print_args.py`.
+
+```python
+from injector import inject
+from lmoe.api.base_expert import BaseExpert
+from lmoe.api.lmoe_query import LmoeQuery
+from lmoe.framework.expert_registry import expert
+
+import argparse
+
+
+@expert
+class PrintArgs(BaseExpert):
+
+    def __init__(self, parsed_args: argparse.Namespace):
+        self.parsed_args = parsed_args
+
+    @classmethod
+    def name(cls):
+        return "PRINT_ARGS"
+
+    @classmethod
+    def has_modelfile(cls):
+        return False
+
+    def description(self):
+        return "Prints the commandline arguments that were used to invoke lmoe."
+
+    def examples(self):
+        return [
+            "print args",
+            "print the commandline args",
+        ]
+
+    def generate(self, lmoe_query: LmoeQuery):
+        print("These are the arguments that were passed to me:")
+        print(self.parsed_args)
+```
+
+Then, create a [Module](https://injector.readthedocs.io/en/latest/api.html#injector.Module) under `$HOME/lmoe_plugins/lmoe_plugins/lmoe_plugin_module.py`.
+
+```python
+from injector import Module, provider, singleton
+from lmoe.framework.plugin_module_registry import plugin_module
+from lmoe_plugins.print_args import PrintArgs
+
+import argparse
+
+
+@plugin_module
+class LmoePluginModule(Module):
+
+    @singleton
+    @provider
+    def provide_print_args(self, parsed_args: argparse.Namespace) -> PrintArgs:
+        return PrintArgs(parsed_args)
+```
+
+Refresh `lmoe` and try your new capability.
+
+```
+% lmoe refresh
+...
+% lmoe print args
+These are the arguments that were passed to me:
+Namespace(query=['print', 'args'], paste=False, classify=False, classifier_modelfile=False, refresh=False)
+```
 
 ## Status
 
-Version 0.2.2
+Version 0.3.0
 
-This is currently a very basic implementation.
+Supports a general expert and image recognition. Limited automation for environment setup, no
+persistence.
 
-Supports a general expert and image recognition.
+This is currently a very basic implementation, but may be useful to others.
 
-Not configurable, limited automation for environment setup, and does not have persistence.
-
-This is not yet ready for others' use.
+The extension model is working, but is not guaranteed to be a stable API.
 
 ### Upcoming features
 
-* dependency injection
 * error handling
 * self-setup of models and ollama context after installation
 * persisted context (i.e. memory, chat-like experience without a formal chat interface)
