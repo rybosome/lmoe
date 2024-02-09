@@ -1,74 +1,49 @@
-from lmoe.api.lmoe_query import LmoeQuery
-from lmoe.experts.classifier import Classifier
-from lmoe.experts.refresh import Refresh
-from lmoe.framework import expert_registry
-from typing import Optional
+from injector import Injector
+from lmoe.commands.command_runner import CommandRunner
+from lmoe.framework.native_module import NativeModule
+from lmoe.framework.plugin_module_registry import PluginModuleRegistry
 
-import argparse
-import pyperclip
+import importlib.util
+import lmoe.experts
+import os
+import pkgutil
 import sys
 
 
+def import_experts(package_path):
+    for file_name in os.listdir(package_path):
+        if file_name.endswith(".py") and file_name != "__init__.py":
+            module_name = file_name[:-3]  # Remove '.py' extension
+            module_path = os.path.join(package_path, file_name)
+
+            spec = importlib.util.spec_from_file_location(module_name, module_path)
+            if spec is not None:
+                module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(module)
+
+
 def run():
-    parser = argparse.ArgumentParser(
-        description="Provide optional context for a query to lmoe through STDIN or the clipboard, then ask a question about it."
-    )
-    parser.add_argument("query", nargs="*", default=None, help="Query for lmoe. Use natural language.")
+    # Dynamically import native experts
+    native_path = os.path.dirname(lmoe.experts.__file__)
+    import_experts(native_path)
 
-    parser.add_argument(
-        "--paste", action="store_true", help="Add context to your query from the system clipboard."
-    )
+    # Dynamically import plugin experts
+    # TODO: support for configuring the plugin directory, naming, etc.
+    home_directory = os.path.expanduser("~")
 
-    ## Debug flags
-    parser.add_argument(
-        "--classify",
-        action="store_true",
-        help="Classify a query, determine which expert should respond to the query without actually responding.",
-    )
-    parser.add_argument(
-        "--classifier_modelfile",
-        action="store_true",
-        help="Print the classifier modelfile.",
-    )
-    parser.add_argument(
-        "--refresh", action="store_true", help="Force a modelfile refresh."
-    )
+    # Add the parent plugin directory to the Python path
+    plugin_parent_path = f"{home_directory}/lmoe_plugins"
+    sys.path.append(plugin_parent_path)
 
-    args = parser.parse_args()
+    # Import the plugin Python module
+    plugin_path = f"{plugin_parent_path}/lmoe_plugins"
+    import_experts(plugin_path)
 
-    user_query = " ".join(args.query)
-    classifier = expert_registry.get_expert(Classifier.name())
+    # Carry on with app instantiation, install native and plugin injection modules
+    modules = [NativeModule]
+    modules.extend(PluginModuleRegistry.modules())
+    injector = Injector(modules)
 
-    ## Debug options
-
-    ##
-    ## Classify a query, print the expert which would respond to it.
-    if args.classify:
-        target_expert = classifier.classify(user_query)
-        print(target_expert.name())
-        print("")
-        exit(0)
-
-    ##
-    ## Print the contents of the classifier modelfile. Used to bootstrap lmoe.
-    if args.classifier_modelfile:
-        print(classifier.modelfile_contents())
-        exit(0)
-
-    ##
-    ## Refreshes the modelfiles with Ollama.
-    if args.refresh:
-        expert_registry.get_expert(Refresh.name()).generate("", "")
-        exit(0)
-
-    stdin_context: Optional[str] = None
-    if not sys.stdin.isatty():
-        stdin_context = sys.stdin.read()
-
-    paste_context: Optional[str] = None
-    if args.paste:
-        if clipboard_content := pyperclip.paste():
-            paste_context = clipboard_content
-
-    target_expert = classifier.classify(user_query)
-    target_expert.generate(LmoeQuery(stdin_context, paste_context, user_query))
+    # Defer execution to the command runner
+    command_runner = injector.get(CommandRunner)
+    command_runner.execute()
