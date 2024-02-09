@@ -1,7 +1,11 @@
 from string import Template
-from lmoe.framework import expert_registry
 from lmoe.api.base_expert import BaseExpert
+from lmoe.experts.general import General
 from lmoe.utils.templates import read_template
+from injector import inject
+from lmoe.framework.expert_registry import ExpertRegistry
+from typing import List
+from lmoe.framework.expert_registry import expert
 
 import re
 import ollama
@@ -28,7 +32,12 @@ $user_query
 )
 
 
+@expert
 class Classifier(BaseExpert):
+
+    @inject
+    def __init__(self, expert_registry: ExpertRegistry):
+        self.expert_registry = expert_registry
 
     @classmethod
     def name(cls):
@@ -41,31 +50,35 @@ class Classifier(BaseExpert):
     def description(self):
         return "The top-level query classifier for lmoe, a layered mixture of experts. Determines from a user's query the expert, LLM or multimodal model which would best serve the user's needs."
 
+    def non_self_expert_names(self) -> List[str]:
+        return [name for name in ExpertRegistry.names() if name != Classifier.name()]
+
+    def non_self_experts(self):
+        return [
+            expert
+            for expert in self.expert_registry.experts()
+            if expert.name() != Classifier.name()
+        ]
+
     def examples(self):
         example_queries = []
-        for e in self.get_non_self_experts():
+        for e in self.non_self_experts():
             example_queries.extend(e.examples())
         return example_queries
 
-    def get_non_self_expert_names(self):
-        return [e.name() for e in expert_registry.values() if e is not self]
-
-    def get_non_self_experts(self):
-        return [e for e in expert_registry.values() if e is not self]
-
     def modelfile_contents(self):
-        all_experts = ", ".join(self.get_non_self_expert_names())
+        all_experts = ", ".join(self.non_self_expert_names())
         all_experts_with_descriptions = "\n".join(
             [
                 Template("$name: $description").substitute(
                     name=e.name(), description=e.description()
                 )
-                for e in self.get_non_self_experts()
+                for e in self.non_self_experts()
             ]
         )
         examples = []
         example_index = 1
-        for e in self.get_non_self_experts():
+        for e in self.non_self_experts():
             for example_query in e.examples():
                 examples.append(
                     _EXAMPLE_TEMPLATE.substitute(
@@ -87,13 +100,12 @@ class Classifier(BaseExpert):
             model="lmoe_classifier",
             prompt=_PROMPT_TEMPLATE.substitute(user_query=user_query),
         )
-        expert_name = self._parse(response["response"])
-        return expert_registry.get_expert(expert_name)
+        return self._parse(response["response"])
 
     def _parse(self, model_response):
         unescaped_model_response = model_response.replace(r"\_", "_")
-        for name in expert_registry.get_registered_names():
+        for name in ExpertRegistry.names():
             match = re.match(f"^[\s]*{name}.*", unescaped_model_response)
             if match:
                 return name
-        return "GENERAL"
+        return General.name()

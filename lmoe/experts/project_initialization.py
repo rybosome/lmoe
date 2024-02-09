@@ -1,9 +1,11 @@
 from lmoe.api.base_expert import BaseExpert
 from lmoe.api.lmoe_query import LmoeQuery
+from lmoe.framework.expert_registry import expert
 
 import ollama
 
 
+@expert
 class ProjectInitialization(BaseExpert):
 
     @classmethod

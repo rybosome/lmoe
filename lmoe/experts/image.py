@@ -1,5 +1,6 @@
 from lmoe.api.base_expert import BaseExpert
 from lmoe.api.lmoe_query import LmoeQuery
+from lmoe.framework.expert_registry import expert
 
 import base64
 import binascii
@@ -36,6 +37,7 @@ def check_base64(s):
         return False
 
 
+@expert
 class Image(BaseExpert):
 
     @classmethod
