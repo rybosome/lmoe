@@ -1,12 +1,11 @@
-import lmoe.experts
+import definitions
 
-from lmoe.framework.expert_registry import ExpertRegistry
 from setuptools import setup, find_packages
 
 
 setup(
     name="lmoe",
-    version="0.3.0",
+    version=VERSION,
     packages=find_packages(),
-    package_data={"lmoe": ExpertRegistry.modelfile_names()},
+    package_data={"lmoe": TEMPLATE_FILE_NAMES},
 )
