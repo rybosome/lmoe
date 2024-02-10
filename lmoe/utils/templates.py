@@ -1,19 +1,70 @@
-import pkg_resources
+from definitions import TEMPLATES
+import yaml
 
-_TEMPLATE_PATH = "lmoe/experts/templates/"
+from dataclasses import dataclass
+from string import Template
+from typing import List, Optional
 
+_EXAMPLE_TEMPLATE = Template(
+    """
+Example $example_index)
 
-def template_path():
-    return _TEMPLATE_PATH
+===stdin-context===
+$stdin_context
+===stdin-context===
+===paste-context===
+$paste_context
+===paste-context===
+===user-query===
+$user_query
+===user-query===
+$agent_response
+"""
+)
 
 
 def read_template(filename):
-    template_path = pkg_resources.resource_filename(
-        __name__, f"../../{_TEMPLATE_PATH}{filename}"
-    )
-    try:
-        with open(template_path, "r") as file:
-            template_contents = file.read()
-        return template_contents
-    except FileNotFoundError:
-        return f"Template file not found: {template_path}"
+    if not filename in TEMPLATES:
+        raise Exception("Could not find: " + filename)
+    template = TEMPLATES[filename]
+    return template.read_text()
+
+
+def read_yaml_file(filename):
+    if not filename in TEMPLATES:
+        print(TEMPLATES)
+        raise Exception("Could not find: " + filename)
+    yaml_file = TEMPLATES[filename]
+    return yaml.safe_load(yaml_file.read_text())
+
+
+@dataclass
+class Example:
+    """Example user context, query, and response."""
+
+    stdin_context: Optional[str]
+    paste_context: Optional[str]
+    user_query: Optional[str]
+    agent_response: Optional[str]
+
+
+def read_yaml_examples(filename):
+    """Reads a yaml file as a list of lmoe.utils.templates.Example instances."""
+    return [Example(**example_dict) for example_dict in read_yaml_file(filename)]
+
+
+def render_examples(examples) -> str:
+    rendered_examples = []
+    example_index = 0
+    for example in examples:
+        example_index += 1
+        rendered_examples.append(
+            _EXAMPLE_TEMPLATE.substitute(
+                example_index=example_index,
+                stdin_context=example.stdin_context,
+                paste_context=example.paste_context,
+                user_query=example.user_query,
+                agent_response=example.agent_response,
+            )
+        )
+    return "\n\n".join(rendered_examples)
