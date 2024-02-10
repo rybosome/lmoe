@@ -1,9 +1,10 @@
-from definitions import TEMPLATES
 import yaml
 
 from dataclasses import dataclass
+from definitions import TEMPLATES
 from string import Template
 from typing import List, Optional
+
 
 _EXAMPLE_TEMPLATE = Template(
     """
