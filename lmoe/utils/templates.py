@@ -1,7 +1,7 @@
 import yaml
 
 from dataclasses import dataclass
-from definitions import TEMPLATES
+from lmoe.definitions import TEMPLATES
 from string import Template
 from typing import List, Optional
 
