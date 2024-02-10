@@ -63,7 +63,7 @@ class Classifier(BaseExpert):
     def example_queries(self):
         all_example_queries = []
         for e in self.non_self_experts():
-            example_queries.extend(e.examples())
+            all_example_queries.extend(e.examples())
         return all_example_queries
 
     def modelfile_contents(self):

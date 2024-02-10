@@ -1,4 +1,4 @@
-import definitions
+from definitions import TEMPLATE_FILE_NAMES, VERSION
 
 from setuptools import setup, find_packages
 
