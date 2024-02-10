@@ -274,7 +274,7 @@ class SayHi(BaseExpert):
     def description(self):
         return "Returns a friendly greeting from lmoe."
 
-    def examples(self):
+    def example_queries(self):
         return [
             "say hello",
             "introduce yourself",
@@ -373,7 +373,7 @@ class PrintArgs(BaseExpert):
     def description(self):
         return "Prints the commandline arguments that were used to invoke lmoe."
 
-    def examples(self):
+    def example_queries(self):
         return [
             "print args",
             "print the commandline args",
