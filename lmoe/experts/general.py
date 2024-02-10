@@ -19,10 +19,9 @@ class General(BaseExpert):
     def description(self):
         return "An all-purpose model, to be used if a question is asked which requires general knowledge, or if you cannot determine a more specific model that would be more appropriate."
 
-    def examples(self):
+    def example_queries(self):
         return [
             "what is the last item in the list?",
-            "What are you?",
             "What is the distance between Earth and Mars?",
         ]
 

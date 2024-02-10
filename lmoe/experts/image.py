@@ -51,7 +51,7 @@ class Image(BaseExpert):
     def description(self):
         return "Analyzes the contents of images and answers questions about them."
 
-    def examples(self):
+    def example_queries(self):
         return [
             "what's in this picture",
             "what's in this iamge",

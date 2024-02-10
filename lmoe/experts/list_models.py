@@ -19,7 +19,7 @@ class ListModels(BaseExpert):
     def description(self):
         return "Describes lmoe-specific models currently installed."
 
-    def examples(self):
+    def example_queries(self):
         return [
             "list models",
             "list your models",

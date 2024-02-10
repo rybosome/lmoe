@@ -47,7 +47,7 @@ class BaseExpert(ABC):
         pass
 
     @abstractmethod
-    def examples(self) -> Sequence[str]:
+    def example_queries(self) -> Sequence[str]:
         """A list of queries which should be routed to this capability."""
         pass
 

@@ -19,7 +19,7 @@ class ProjectInitialization(BaseExpert):
     def description(self):
         return "A model designed to initialize programming projects. Given verbal and ascii art descriptions and context, initializes programming projects in a number of different languages. Does not answer questions about how to initialize, only commands to perform initialization."
 
-    def examples(self):
+    def example_queries(self):
         return [
             "create a project for a java webserver using spring to serve the contents of the '/web/ directory",
             "initialize a project for a new npm module",

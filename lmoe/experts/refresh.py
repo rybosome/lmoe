@@ -28,7 +28,7 @@ class Refresh(BaseExpert):
     def description(self):
         return "An internal command to refresh internal lmoe modelfiles, which is necessary after adding new ones or modifying a prompt."
 
-    def examples(self):
+    def example_queries(self):
         return [
             "refresh",
             "refresh classifier",

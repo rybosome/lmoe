@@ -60,11 +60,11 @@ class Classifier(BaseExpert):
             if expert.name() != Classifier.name()
         ]
 
-    def examples(self):
-        example_queries = []
+    def example_queries(self):
+        all_example_queries = []
         for e in self.non_self_experts():
             example_queries.extend(e.examples())
-        return example_queries
+        return all_example_queries
 
     def modelfile_contents(self):
         all_experts = ", ".join(self.non_self_expert_names())
@@ -79,7 +79,7 @@ class Classifier(BaseExpert):
         examples = []
         example_index = 1
         for e in self.non_self_experts():
-            for example_query in e.examples():
+            for example_query in e.example_queries():
                 examples.append(
                     _EXAMPLE_TEMPLATE.substitute(
                         example_index=example_index,
