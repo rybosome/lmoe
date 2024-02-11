@@ -111,3 +111,6 @@ cython_debug/
 
 # Private data
 .pat
+
+# Mac OSX
+.DS_Store
