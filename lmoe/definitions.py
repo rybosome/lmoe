@@ -1,8 +1,6 @@
 import importlib.metadata
 import importlib.resources
 import os
-import toml
-import pathlib
 
 
 def get_template_module():
