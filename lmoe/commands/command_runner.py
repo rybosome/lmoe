@@ -5,6 +5,7 @@ from lmoe.commands.print_classification import PrintClassification
 from lmoe.commands.print_classifier_modelfile import PrintClassifierModelfile
 from lmoe.commands.query import Query
 from lmoe.commands.refresh import Refresh
+from lmoe.commands.version import Version
 
 import argparse
 
@@ -19,6 +20,7 @@ class CommandRunner:
     print_classifier_modelfile: PrintClassifierModelfile
     query: Query
     refresh: Refresh
+    version: Version
 
     def execute(self):
         command = None
@@ -29,6 +31,8 @@ class CommandRunner:
             command = self.print_classifier_modelfile
         elif self.parsed_args.refresh:
             command = self.refresh
+        elif self.parsed_args.version:
+            command = self.version
         else:
             command = self.query
 

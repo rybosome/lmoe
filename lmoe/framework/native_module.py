@@ -29,6 +29,12 @@ class NativeModule(Module):
             help="Add context to your query from the system clipboard.",
         )
 
+        parser.add_argument(
+            "--version",
+            action="store_true",
+            help="Print the current version string."
+        )
+
         ## Debug flags
         parser.add_argument(
             "--classify",
