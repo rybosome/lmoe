@@ -293,6 +293,192 @@ Refresh `lmoe` and try your new command out!
 Hello from a plugin!
 ```
 
+### Adding a new expert with a model
+
+Experts with models can have much more intelligent capabilities. Let's add one which describes the weather in a random city.
+
+First, let's create a modelfile under `$HOME/lmoe_plugins/lmoe_plugins/random_weather.modelfile.txt`.
+
+```
+FROM mistral
+SYSTEM """
+Your job is to summarize a JSON object which has information about the current weather in a given city. You are to give a natural language description of the weather conditions.
+
+Here are the keys of the JSON object.
+
+'temperature_2m': The temperature in farenheit
+'relative_humidity_2m': The relative humidity percentage
+'cloud_cover': The percentage of cloud coverage
+'wind_speed_10m': The wind speed in miles per hour
+'rain': Rainfall in millimeters
+'showers': Showers in millimeters
+'snowfall': Snowfall in millimeters
+'city': The city
+'country': The country
+'description': A short description of the weather conditions
+
+I'll share some examples.
+
+Example 1)
+
+user: {'temperature_2m': 90.1, 'relative_humidity_2m': 64, 'cloud_cover': 46, 'wind_speed_10m': 12.4, 'rain': 0.0, 'showers': 0.0, 'snowfall': 0.0, 'city': 'Chigorodó', 'country': 'Colombia', 'description': 'Partly cloudy'}
+agent: It is currently 90 degrees and partly cloudy in Chigorodó, Colombia, with no recent precipitation.
+
+Example 2)
+user: {'temperature_2m': 74.0, 'relative_humidity_2m': 79, 'cloud_cover': 42, 'wind_speed_10m': 4.1, 'rain': 0.0, 'showers': 0.0, 'snowfall': 0.0, 'city': 'Boa Esperança', 'country': 'Brazil', 'description': 'Mainly clear'}
+agent: The weather in Boa Esperança, Brazil is mainly clear. It is 74 degrees, with winds around 4 miles per hour.
+
+Example 3)
+user: {'temperature_2m': 65.2, 'relative_humidity_2m': 50, 'cloud_cover': 67, 'wind_speed_10m': 4.9, 'rain': 0.0, 'showers': 0.0, 'snowfall': 0.0, 'city': 'Sánchez Carrión Province', 'country': 'Peru', 'description': 'Partly cloudy'}
+agent: It is a partly cloudy day in Sánchez Carrión Province, Peru, with 67% cloud coverage. It is currently 65 degrees, with winds around 5 miles per hour.
+
+Example 4)
+user: {'temperature_2m': 75.1, 'relative_humidity_2m': 71, 'cloud_cover': 83, 'wind_speed_10m': 6.2, 'rain': 0.0, 'showers': 0.0, 'snowfall': 0.0, 'city': 'Ribeirão das Neves', 'country': 'Brazil', 'description': 'Overcast'}
+agent: Ribeirão das Neves, Brazil is currently 75 degrees and overcast. There has been no recent precipitation.
+"""
+```
+
+Then, let's create an expert class to generate this JSON object and pass it to the summarizer at `$HOME/lmoe_plugins/lmoe_plugins/random_weather.py`.
+
+```python
+import ollama
+import os
+import random
+import requests
+
+
+from lmoe.api.base_expert import BaseExpert
+from lmoe.api.lmoe_query import LmoeQuery
+from lmoe.framework.expert_registry import expert
+
+
+_RANDOM_CITY_URL_TEMPLATE = "http://geodb-free-service.wirefreethought.com/v1/geo/cities?limit=1&offset={0}&hateoasMode=off"
+
+_MAX_RANDOM_CITY_INDEX = 28177
+
+_WEATHER_API_URL = "https://api.open-meteo.com/v1/forecast"
+
+_WMO_INTERPRETATION_CODES = {
+    0: "Clear sky",
+    1: "Mainly clear",
+    2: "Partly cloudy",
+    3: "Overcast",
+    45: "Fog",
+    48: "Depositing rime fog",
+    51: "Light drizzle",
+    53: "Moderate drizzle",
+    55: "Dense drizzle",
+    56: "Light freezing drizzle",
+    57: "Dense freezing drizzle",
+    61: "Light rain",
+    63: "Moderate rain",
+    65: "Heavy rain",
+    66: "Light freezing rain",
+    67: "Heavy freezing rain",
+    71: "Light snow",
+    73: "Moderate snow",
+    75: "Heavy snow",
+    77: "Snow grains",
+    80: "Light rain showers",
+    81: "Moderate rain showers",
+    82: "Heavy rain showers",
+    85: "Light snow showers",
+    86: "Heavy snow showers",
+    95: "Thunderstorms",
+    96: "Thunderstorms with slight hail",
+    99: "Thunderstorms with heavy hail",
+}
+
+
+def get_random_city():
+    random_number = random.randint(1, _MAX_RANDOM_CITY_INDEX)
+    r = requests.get(_RANDOM_CITY_URL_TEMPLATE.format(random_number))
+    return r.json()["data"][0]
+
+
+def get_weather_json(city_json):
+    r = requests.get(
+        _WEATHER_API_URL,
+        params={
+            "latitude": city_json["latitude"],
+            "longitude": city_json["longitude"],
+            "current": "temperature_2m,relative_humidity_2m,cloud_cover,wind_speed_10m,rain,showers,snowfall,weather_code",
+            "temperature_unit": "fahrenheit",
+        },
+    )
+    return r.json()["current"]
+
+
+@expert
+class RandomWeather(BaseExpert):
+
+    @classmethod
+    def name(cls):
+        return "RANDOM_WEATHER"
+
+    @classmethod
+    def has_modelfile(cls):
+        return True
+
+    @classmethod
+    def modelfile_name(cls):
+        home_dir = os.environ.get('HOME')
+        return f"{home_dir}/lmoe_plugins/lmoe_plugins/random_weather.modelfile.txt"
+
+    def modelfile_contents(self):
+        with open(self.modelfile_name(), "r") as file:
+            return file.read()
+
+    def description(self):
+        return "Describes the weather in a random city."
+
+    def example_queries(self):
+        return [
+            "tell me the weather in a random city",
+            "random weather",
+        ]
+
+    def generate(self, lmoe_query: LmoeQuery):
+        city_json = get_random_city()
+        weather_json = get_weather_json(city_json)
+        weather_json["city"] = city_json["city"]
+        weather_json["country"] = city_json["country"]
+        weather_code = weather_json["weather_code"]
+        weather_json["description"] = (
+            _WMO_INTERPRETATION_CODES[weather_code]
+            if weather_code in _WMO_INTERPRETATION_CODES
+            else ""
+        )
+        del weather_json["weather_code"]
+        del weather_json["time"]
+        del weather_json["interval"]
+        stream = ollama.generate(
+            model="lmoe_random_weather",
+            prompt=str(weather_json),
+            stream=True,
+        )
+        for chunk in stream:
+            if chunk["response"] or not chunk["done"]:
+                print(chunk["response"], end="", flush=True)
+        print("")
+```
+
+Refresh, and try out your new capability.
+
+```
+% lmoe refresh
+...
+
+% lmoe random weather
+It is currently a chilly 19 degrees in Konkovo District, Russia, with overcast conditions and high
+relative humidity of 90%. Winds are blowing around 9.2 miles per hour.
+
+% lmoe random weather
+In Arbon District, Switzerland, the weather is currently overcast with a temperature of 43.5
+degrees Fahrenheit and a relative humidity of 75%. The winds are blowing at a speed of 7.4 miles
+per hour. There has been no recent precipitation reported.
+```
+
 ### Overriding a native expert
 
 Let's override the `GENERAL` expert with a less helpful variant.
