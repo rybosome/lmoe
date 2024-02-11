@@ -9,4 +9,3 @@ class Version(Command):
 
     def execute(self, parsed_args: argparse.Namespace, lmoe_query: LmoeQuery) -> None:
         print(get_project_version())
-

@@ -12,7 +12,7 @@ from string import Template
 import ollama
 
 
-@expert
+# @expert
 class Personality(BaseExpert):
 
     def __init__(self):

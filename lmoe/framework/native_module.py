@@ -30,9 +30,7 @@ class NativeModule(Module):
         )
 
         parser.add_argument(
-            "--version",
-            action="store_true",
-            help="Print the current version string."
+            "--version", action="store_true", help="Print the current version string."
         )
 
         ## Debug flags

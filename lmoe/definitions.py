@@ -15,12 +15,13 @@ _PYPROJECT_DATA = None
 
 
 def get_project_data():
-    global _PYPROJECT_DATA 
-    if _PYPROJECT_DATA  is None:
-        pyproject_path = pathlib.Path(__file__).parent.parent / 'pyproject.toml'
-        with open(pyproject_path, 'r') as file:
+    global _PYPROJECT_DATA
+    if _PYPROJECT_DATA is None:
+        pyproject_path = pathlib.Path(__file__).parent.parent / "pyproject.toml"
+        with open(pyproject_path, "r") as file:
             _PYPROJECT_DATA = toml.load(file)
     return _PYPROJECT_DATA
+
 
 def get_project_version():
     return get_project_data()["tool"]["poetry"]["version"]
@@ -33,6 +34,7 @@ TEMPLATES = {
 
 # The absolute filenames of all resource template files
 _TEMPLATE_FILE_NAMES = None
+
 
 def get_template_file_names():
     if _TEMPLATE_FILE_NAMES is None:
