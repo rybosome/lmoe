@@ -16,20 +16,15 @@ You may wish to install `lmoe` in a virtual environment.
 % pip install lmoe
 ```
 
-Ensure that an Ollama server is running, then manually initialize the root classification model.
+Ensure that an Ollama server is running. 
 
 ```
-% lmoe --classifier_modelfile > temp-classifier-modelfile.txt
-% ollama create lmoe_classifier -f temp-classifier-modelfile.txt
+% lmoe --initialize
 ```
 
-Finally, refresh the rest of the models.
+This will download any base Ollama models and create `lmoe`-internal models.
 
-```
-% lmoe refresh
-```
-
-Further interaction wtih `lmoe` may cause Ollama to pull any models not present on your local machine.
+`lmoe` is now ready to use!
 
 ## Overview
 
@@ -601,7 +596,7 @@ Namespace(query=['print', 'args'], paste=False, classify=False, classifier_model
 
 ## Status
 
-Version 0.3.6
+Version 0.3.7
 
 Supports a general expert and image recognition. Limited automation for environment setup, no
 persistence.
