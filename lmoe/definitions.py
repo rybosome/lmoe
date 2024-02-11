@@ -1,3 +1,4 @@
+import importlib.metadata
 import importlib.resources
 import os
 import toml
@@ -9,29 +10,9 @@ def get_template_module():
     return "lmoe.templates"
 
 
-def get_pyproject_filename():
-    return importlib.resources.files("lmoe").joinpath("pyproject.toml").name
-
-
-# Cache data for the root pyproject.toml file.
-_PYPROJECT_DATA = None
-
-
-def get_project_data():
-    """Return the pyproject.toml file structured as a multi-layer dict.
-
-    Caches loaded data so that this is only retrieved from the filesystem once.
-    """
-    global _PYPROJECT_DATA
-    if _PYPROJECT_DATA is None:
-        pyproject_path = importlib.resources.files("lmoe").joinpath("pyproject.toml")
-        _PYPROJECT_DATA = toml.loads(pyproject_path.read_text())
-    return _PYPROJECT_DATA
-
-
 def get_project_version():
     """Returns the semantic versioning string associated with this project."""
-    return get_project_data()["tool"]["poetry"]["version"]
+    return importlib.metadata.version("lmoe")
 
 
 # The absolute filenames of all resource template files
