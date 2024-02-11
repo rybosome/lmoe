@@ -42,9 +42,18 @@ class Refresh(BaseExpert):
         existing_model_names = [
             model["name"].split(":")[0] for model in response["models"]
         ]
+        all_lmoe_models = set(
+            [
+                e.model_name()
+                for e in self.expert_registry.experts()
+                if e.has_modelfile()
+            ]
+        )
+        print("Refreshing lmoe models: ", all_lmoe_models)
         for e in [e for e in self.expert_registry.experts() if e.has_modelfile()]:
+            print(f"  {e.model_name()}")
             if e.model_name() in existing_model_names:
-                print(f"Deleting existing {e.model_name()}...")
+                print(f"    Deleting...")
                 ollama.delete(e.model_name())
-            print(f"Updating {e.model_name()}...")
+            print(f"    Creating...")
             ollama.create(model=e.model_name(), modelfile=e.modelfile_contents())

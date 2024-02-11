@@ -28,7 +28,11 @@ class NativeModule(Module):
             action="store_true",
             help="Add context to your query from the system clipboard.",
         )
-
+        parser.add_argument(
+            "--initialize",
+            action="store_true",
+            help="Initialize a new installation of lmoe.",
+        )
         parser.add_argument(
             "--version", action="store_true", help="Print the current version string."
         )
