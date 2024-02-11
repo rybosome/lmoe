@@ -415,7 +415,7 @@ Namespace(query=['print', 'args'], paste=False, classify=False, classifier_model
 
 ## Status
 
-Version 0.3.5
+Version 0.3.6
 
 Supports a general expert and image recognition. Limited automation for environment setup, no
 persistence.

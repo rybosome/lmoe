@@ -11,5 +11,6 @@ setup(
     version=get_project_version(),
     packages=find_packages(),
     package_data={"lmoe": get_template_file_names() + [get_pyproject_filename()]},
+    package_dir={"": ""},
     include_package_data=True,
 )
