@@ -1,9 +1,55 @@
+import importlib.resources
 import yaml
 
 from dataclasses import dataclass
-from lmoe.definitions import TEMPLATES
+from lmoe.definitions import get_template_module
 from string import Template
 from typing import List, Optional
+
+# Mapping from filename to Traversable object
+_TEMPLATES = None
+
+
+def load_templates():
+    global _TEMPLATES
+    if _TEMPLATES is None:
+        template_dir_object = importlib.resources.files(get_template_module())
+        _TEMPLATES = {
+            file_object.name: file_object
+            for file_object in template_dir_object.iterdir()
+        }
+    return _TEMPLATES
+
+
+def read_template(filename):
+    templates = load_templates()
+    if not filename in templates:
+        raise Exception("Could not find: " + filename)
+    template = templates[filename]
+    return template.read_text()
+
+
+def read_yaml_file(filename):
+    templates = load_templates()
+    if not filename in templates:
+        raise Exception("Could not find: " + filename)
+    yaml_file = templates[filename]
+    return yaml.safe_load(yaml_file.read_text())
+
+
+@dataclass
+class Example:
+    """Example user context, query, and response."""
+
+    stdin_context: Optional[str]
+    paste_context: Optional[str]
+    user_query: Optional[str]
+    agent_response: Optional[str]
+
+
+def read_yaml_examples(filename):
+    """Reads a yaml file as a list of lmoe.utils.templates.Example instances."""
+    return [Example(**example_dict) for example_dict in read_yaml_file(filename)]
 
 
 _EXAMPLE_TEMPLATE = Template(
@@ -22,36 +68,6 @@ $user_query
 $agent_response
 """
 )
-
-
-def read_template(filename):
-    if not filename in TEMPLATES:
-        raise Exception("Could not find: " + filename)
-    template = TEMPLATES[filename]
-    return template.read_text()
-
-
-def read_yaml_file(filename):
-    if not filename in TEMPLATES:
-        print(TEMPLATES)
-        raise Exception("Could not find: " + filename)
-    yaml_file = TEMPLATES[filename]
-    return yaml.safe_load(yaml_file.read_text())
-
-
-@dataclass
-class Example:
-    """Example user context, query, and response."""
-
-    stdin_context: Optional[str]
-    paste_context: Optional[str]
-    user_query: Optional[str]
-    agent_response: Optional[str]
-
-
-def read_yaml_examples(filename):
-    """Reads a yaml file as a list of lmoe.utils.templates.Example instances."""
-    return [Example(**example_dict) for example_dict in read_yaml_file(filename)]
 
 
 def render_examples(examples) -> str:
