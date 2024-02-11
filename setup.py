@@ -1,10 +1,13 @@
-from lmoe.definitions import TEMPLATE_FILE_NAMES, VERSION
+from lmoe.definitions import get_template_file_names, get_project_version
 from setuptools import setup, find_packages
 
 
 setup(
     name="lmoe",
-    version=VERSION,
+    version=get_project_version(),
     packages=find_packages(),
-    package_data={"lmoe": TEMPLATE_FILE_NAMES},
+    package_data={
+        "": ["pyproject.toml"],
+        "lmoe": get_template_file_names()
+        },
 )
