@@ -7,4 +7,5 @@ setup(
     version=get_project_version(),
     packages=find_packages(),
     package_data={"": ["pyproject.toml"], "lmoe": get_template_file_names()},
+    include_package_data=True,
 )
