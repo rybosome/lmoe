@@ -9,6 +9,13 @@ def get_template_module():
     return "lmoe.templates"
 
 
+ABSOLUTE_PYPROJECT_FILENAME = pathlib.Path(__file__).parent.parent / "pyproject.toml"
+
+
+def get_pyproject_filename():
+    return ABSOLUTE_PYPROJECT_FILENAME
+
+
 # Cache data for the root pyproject.toml file.
 _PYPROJECT_DATA = None
 
@@ -20,8 +27,7 @@ def get_project_data():
     """
     global _PYPROJECT_DATA
     if _PYPROJECT_DATA is None:
-        pyproject_path = pathlib.Path(__file__).parent.parent / "pyproject.toml"
-        with open(pyproject_path, "r") as file:
+        with open(ABSOLUTE_PYPROJECT_FILENAME, "r") as file:
             _PYPROJECT_DATA = toml.load(file)
     return _PYPROJECT_DATA
 
