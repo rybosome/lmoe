@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from injector import Injector, inject
 from typing import List
 
@@ -32,17 +33,19 @@ class ExpertRegistry:
         """List of experts which have been registered."""
         return [key for key in cls._expert_registry.keys()]
 
-    @classmethod
-    def modelfile_names(cls) -> List[str]:
-        """List of known modelfiles backed by registered experts."""
-        return [
-            expert_type.modelfile_name()
-            for expert_type in cls._expert_registry.values()
-            if expert_type.has_modelfile()
-        ]
+    @dataclass
+    class Without:
+        name: str
 
-    def experts(self):
-        return [self.get(expert_name) for expert_name in ExpertRegistry.names()]
+    def experts(self, without=None):
+        if not without:
+            return [self.get(expert_name) for expert_name in ExpertRegistry.names()]
+
+        return [
+            self.get(expert_name)
+            for expert_name in ExpertRegistry.names()
+            if expert_name != without.name
+        ]
 
     def get(self, expert_name):
         if expert_name not in self._expert_registry:

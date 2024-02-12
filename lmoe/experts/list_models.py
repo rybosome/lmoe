@@ -13,7 +13,7 @@ class ListModels(BaseExpert):
         return "LIST_MODELS"
 
     @classmethod
-    def has_modelfile(cls):
+    def has_model(cls):
         return False
 
     def description(self):

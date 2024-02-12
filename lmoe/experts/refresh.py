@@ -1,11 +1,9 @@
-from string import Template
-
+from injector import inject
 from lmoe.api.base_expert import BaseExpert
 from lmoe.api.lmoe_query import LmoeQuery
-from lmoe.framework.expert_registry import ExpertRegistry
-from lmoe.framework.expert_registry import expert
+from lmoe.framework.expert_registry import ExpertRegistry, expert
+from string import Template
 
-from injector import inject
 
 import ollama
 
@@ -22,7 +20,7 @@ class Refresh(BaseExpert):
         return "REFRESH"
 
     @classmethod
-    def has_modelfile(cls):
+    def has_model(cls):
         return False
 
     def description(self):
@@ -44,16 +42,18 @@ class Refresh(BaseExpert):
         ]
         all_lmoe_models = set(
             [
-                e.model_name()
+                e.model.ollama_name()
                 for e in self.expert_registry.experts()
-                if e.has_modelfile()
+                if e.has_model()
             ]
         )
-        print("Refreshing lmoe models: ", all_lmoe_models)
-        for e in [e for e in self.expert_registry.experts() if e.has_modelfile()]:
-            print(f"  {e.model_name()}")
-            if e.model_name() in existing_model_names:
+        print("Refreshing Ollama's models: ", all_lmoe_models)
+        for model in [e.model for e in self.expert_registry.experts() if e.has_model()]:
+            print(f"  {model.ollama_name()}")
+            if model.ollama_name() in existing_model_names:
                 print(f"    Deleting...")
-                ollama.delete(e.model_name())
+                ollama.delete(model.ollama_name())
             print(f"    Creating...")
-            ollama.create(model=e.model_name(), modelfile=e.modelfile_contents())
+            ollama.create(
+                model=model.ollama_name(), modelfile=model.modelfile_contents()
+            )

@@ -5,20 +5,21 @@
 `lmoe` (Layered Mixture of Experts, pronounced "Elmo") is a programmable, multimodal CLI assistant
 with a natural language interface.
 
-Running on Ollama and various open-weight models, `lmoe` is a simple, yet powerful way to
+Running on [Ollama](https://github.com/ollama/ollama) and various [open-weight models](https://ollama.com/library), `lmoe` is a simple, yet powerful way to
 interact with highly configurable AI models from the command line.
 
 ## Setup
 
-You may wish to install `lmoe` in a virtual environment.
+### Dependencies
+
+Ensure that an [Ollama](https://github.com/ollama/ollama) server is running.
+
+It is recommended to install `lmoe` in a [virtual environment](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/).
+
+### Installation & Initialization
 
 ```
 % pip install lmoe
-```
-
-Ensure that an Ollama server is running. 
-
-```
 % lmoe --initialize
 ```
 
@@ -27,6 +28,8 @@ This will download any base Ollama models and create `lmoe`-internal models.
 `lmoe` is now ready to use!
 
 ## Overview
+
+`lmoe` is your CLI assistant. It [classifies](https://github.com/rybosome/lmoe/blob/main/lmoe/templates/classifier.modelfile.txt) your query to one of its various [experts](https://github.com/rybosome/lmoe/tree/main/lmoe/experts), which are [specializations](https://github.com/rybosome/lmoe/tree/main/lmoe/templates) of various [open-weight models](https://ollama.com/library).
 
 ### Natural language querying
 ```
@@ -41,13 +44,11 @@ This will download any base Ollama models and create `lmoe`-internal models.
 ### Piping context
 
 ```
-% cat projects/lmoe/lmoe/main.py | lmoe what does this code do
-
- The provided code defines a Python script named 'lmoe' which includes an argument parser, the
- ability to read context from both STDIN and the clipboard, and a 'classifier' module for
- determining which expert should respond to a query without actually responding. It does not contain
- any functionality for executing queries or providing responses itself. Instead, it sets up the
- infrastructure for interfacing with external experts through their 'generate' methods.
+% cat lmoe/main.py | lmoe what does this code do
+ This code sets up and runs an instance of `lmoe` (Layered Mixture of Experts), a Python
+ application. It imports various modules, including the native experts and plugin experts for
+ `lmoe`. The `run()` function is then called to instantiate the app and defer execution to the
+ command runner.
 ```
 
 ```
@@ -113,7 +114,9 @@ This is `lmoe`'s first attempt to describe its default avatar.
 **Note**: currently this is raw, unparsed JSON output. Edited by hand for readability.
 
 ```
-% curl -sS 'https://rybosome.github.io/lmoe/assets/lmoe-armadillo.png' | base64 -i - | lmoe what is in this picture
+% curl -sS 'https://rybosome.github.io/lmoe/assets/lmoe-armadillo.png' |
+base64 -i - |
+lmoe what is in this picture
 {
     "model":"llava",
     "created_at":"2024-02-08T07:09:28.827507Z",
@@ -245,54 +248,17 @@ To get started, create a directory structure like this:
 % mkdir -p "$HOME/lmoe_plugins/lmoe_plugins"
 ```
 
-### Adding a new expert
+### All samples
 
-Create a new file under `$HOME/lmoe_plugins/lmoe_plugins/say_hi.py`.
+See the [examples](https://github.com/rybosome/lmoe/main/docs/examples/lmoe_plugins) directory.
 
-```python
-from lmoe.api.base_expert import BaseExpert
-from lmoe.api.lmoe_query import LmoeQuery
-from lmoe.framework.expert_registry import expert
-
-
-@expert
-class SayHi(BaseExpert):
-
-    @classmethod
-    def name(cls):
-        return "SAY_HI"
-
-    @classmethod
-    def has_modelfile(cls):
-        return False
-
-    def description(self):
-        return "Returns a friendly greeting from lmoe."
-
-    def example_queries(self):
-        return [
-            "say hello",
-            "introduce yourself",
-        ]
-
-    def generate(self, lmoe_query: LmoeQuery):
-        print("Hello from a plugin!")
-```
-
-Refresh `lmoe` and try your new command out!
-
-```
-% lmoe refresh
-...
-% lmoe say hi
-Hello from a plugin!
-```
+Here are some to get started.
 
 ### Adding a new expert with a model
 
-Experts with models can have much more intelligent capabilities. Let's add one which describes the weather in a random city.
+Let's add an expert which describes the weather in a random city.
 
-First, let's create a modelfile under `$HOME/lmoe_plugins/lmoe_plugins/random_weather.modelfile.txt`.
+First, create a modelfile under `$HOME/lmoe_plugins/lmoe_plugins/random_weather.modelfile.txt`.
 
 ```
 FROM mistral
@@ -308,8 +274,8 @@ Here are the keys of the JSON object.
 'rain': Rainfall in millimeters
 'showers': Showers in millimeters
 'snowfall': Snowfall in millimeters
-'city': The city
-'country': The country
+'name': The name of the city
+'country': The name of the country
 'description': A short description of the weather conditions
 
 I'll share some examples.
@@ -336,93 +302,167 @@ agent: Ribeirão das Neves, Brazil is currently 75 degrees and overcast. There h
 Then, let's create an expert class to generate this JSON object and pass it to the summarizer at `$HOME/lmoe_plugins/lmoe_plugins/random_weather.py`.
 
 ```python
+import json
 import ollama
 import os
 import random
 import requests
 
-
-from lmoe.api.base_expert import BaseExpert
+from dataclasses import asdict, dataclass
+from enum import Enum
 from lmoe.api.lmoe_query import LmoeQuery
+from lmoe.api.model import Model
+from lmoe.api.model_expert import ModelExpert
+from lmoe.api.ollama_client import stream
 from lmoe.framework.expert_registry import expert
 
 
-_RANDOM_CITY_URL_TEMPLATE = "http://geodb-free-service.wirefreethought.com/v1/geo/cities?limit=1&offset={0}&hateoasMode=off"
+@dataclass(frozen=True)
+class City:
+    """Basic information about a city."""
 
-_MAX_RANDOM_CITY_INDEX = 28177
+    name: str
+    country: str
+    latitude: float
+    longitude: float
 
-_WEATHER_API_URL = "https://api.open-meteo.com/v1/forecast"
+    """URL for a service which returns information on a city at the given index."""
+    _RANDOM_CITY_URL_TEMPLATE = "http://geodb-free-service.wirefreethought.com/v1/geo/cities?limit=1&offset={0}&hateoasMode=off"
 
-_WMO_INTERPRETATION_CODES = {
-    0: "Clear sky",
-    1: "Mainly clear",
-    2: "Partly cloudy",
-    3: "Overcast",
-    45: "Fog",
-    48: "Depositing rime fog",
-    51: "Light drizzle",
-    53: "Moderate drizzle",
-    55: "Dense drizzle",
-    56: "Light freezing drizzle",
-    57: "Dense freezing drizzle",
-    61: "Light rain",
-    63: "Moderate rain",
-    65: "Heavy rain",
-    66: "Light freezing rain",
-    67: "Heavy freezing rain",
-    71: "Light snow",
-    73: "Moderate snow",
-    75: "Heavy snow",
-    77: "Snow grains",
-    80: "Light rain showers",
-    81: "Moderate rain showers",
-    82: "Heavy rain showers",
-    85: "Light snow showers",
-    86: "Heavy snow showers",
-    95: "Thunderstorms",
-    96: "Thunderstorms with slight hail",
-    99: "Thunderstorms with heavy hail",
-}
-
-
-def get_random_city():
-    random_number = random.randint(1, _MAX_RANDOM_CITY_INDEX)
-    r = requests.get(_RANDOM_CITY_URL_TEMPLATE.format(random_number))
-    return r.json()["data"][0]
-
-
-def get_weather_json(city_json):
-    r = requests.get(
-        _WEATHER_API_URL,
-        params={
-            "latitude": city_json["latitude"],
-            "longitude": city_json["longitude"],
-            "current": "temperature_2m,relative_humidity_2m,cloud_cover,wind_speed_10m,rain,showers,snowfall,weather_code",
-            "temperature_unit": "fahrenheit",
-        },
-    )
-    return r.json()["current"]
-
-
-@expert
-class RandomWeather(BaseExpert):
+    """The maximum value returning a city instance for the above service."""
+    _MAX_RANDOM_CITY_INDEX = 28177
 
     @classmethod
-    def name(cls):
-        return "RANDOM_WEATHER"
+    def random(cls) -> "City":
+        """Returns information on a random city."""
+        random_number = random.randint(1, cls._MAX_RANDOM_CITY_INDEX)
+        r = requests.get(cls._RANDOM_CITY_URL_TEMPLATE.format(random_number))
+        json = r.json()["data"][0]
+        return City(
+            name=json["city"],
+            country=json["country"],
+            latitude=json["latitude"],
+            longitude=json["longitude"],
+        )
+
+
+class WMOInterpretationCode(Enum):
+    """Partial implementation of World Meteorological Organization codes describing weather conditions.
+
+    https://www.nodc.noaa.gov/archive/arc0021/0002199/1.1/data/0-data/HTML/WMO-CODE/WMO4677.HTM
+    """
+
+    CLEAR_SKY = 0
+    MAINLY_CLEAR = 1
+    PARTLY_CLOUDY = 2
+    OVERCAST = 3
+    FOG = 45
+    DEPOSITING_RIME_FOG = 48
+    LIGHT_DRIZZLE = 51
+    MODERATE_DRIZZLE = 53
+    DENSE_DRIZZLE = 55
+    LIGHT_FREEZING_DRIZZLE = 56
+    DENSE_FREEZING_DRIZZLE = 57
+    LIGHT_RAIN = 61
+    MODERATE_RAIN = 63
+    HEAVY_RAIN = 65
+    LIGHT_FREEZING_RAIN = 66
+    HEAVY_FREEZING_RAIN = 67
+    LIGHT_SNOW = 71
+    MODERATE_SNOW = 73
+    HEAVY_SNOW = 75
+    SNOW_GRAINS = 77
+    LIGHT_RAIN_SHOWERS = 80
+    MODERATE_RAIN_SHOWERS = 81
+    HEAVY_RAIN_SHOWERS = 82
+    LIGHT_SNOW_SHOWERS = 85
+    HEAVY_SNOW_SHOWERS = 86
+    THUNDERSTORMS = 95
+    THUNDERSTORMS_WITH_SLIGHT_HAIL = 96
+    THUNDERSTORMS_WITH_HEAVY_HAIL = 99
 
     @classmethod
-    def has_modelfile(cls):
-        return True
+    def describe(cls, code: int) -> str:
+        """Gives a title cased description of an int code if it exists, or an empty string."""
+        return (
+            cls(code).name.replace("_", " ").title() if code in cls.__members__ else ""
+        )
+
+
+@dataclass(frozen=True)
+class WeatherReport:
+    """A description of weather conditions in a particular moment - (only current supported)."""
+    city: City
+    temperature_2m: str
+    relative_humidity_2m: int
+    cloud_cover: int
+    wind_speed_10m: float
+    rain: float
+    showers: float
+    snowfall: float
+    weather_description: str
+
+    """Base URL of the https://open-meteo.com/ current forecast API."""
+    _WEATHER_API_URL = "https://api.open-meteo.com/v1/forecast"
+
+    def json(self) -> str:
+        """Returns a JSON string."""
+        partial_dict = asdict(self)
+        return json.dumps(partial_dict)
+
+    @classmethod
+    def current(cls, city: City) -> "WeatherReport":
+        """Current weather conditions for the given city."""
+        r = requests.get(
+            cls._WEATHER_API_URL,
+            params={
+                "latitude": city.latitude,
+                "longitude": city.longitude,
+                "current": "temperature_2m,relative_humidity_2m,cloud_cover,wind_speed_10m,rain,showers,snowfall,weather_code",
+                "temperature_unit": "fahrenheit",
+            },
+        )
+        response = r.json()["current"]
+        return WeatherReport(
+            city=city,
+            temperature_2m=response["temperature_2m"],
+            relative_humidity_2m=response["relative_humidity_2m"],
+            cloud_cover=response["cloud_cover"],
+            wind_speed_10m=response["wind_speed_10m"],
+            rain=response["rain"],
+            showers=response["showers"],
+            snowfall=response["snowfall"],
+            weather_description=WMOInterpretationCode.describe(
+                response["weather_code"]
+            ),
+        )
+
+class RandomWeatherModel(Model):
+    """A model instructed to summarize JSON blobs about weather in natural language."""
+
+    def __init__(self):
+        super(RandomWeatherModel, self).__init__("RANDOM_WEATHER")
 
     @classmethod
     def modelfile_name(cls):
-        home_dir = os.environ.get('HOME')
+        home_dir = os.environ.get("HOME")
         return f"{home_dir}/lmoe_plugins/lmoe_plugins/random_weather.modelfile.txt"
 
     def modelfile_contents(self):
         with open(self.modelfile_name(), "r") as file:
             return file.read()
+
+
+@expert
+class RandomWeather(ModelExpert):
+    """An expert which retrieves a random weather report in JSON and summarizes it."""
+
+    def __init__(self):
+        super(RandomWeather, self).__init__(RandomWeatherModel())
+
+    @classmethod
+    def name(cls):
+        return "RANDOM_WEATHER"
 
     def description(self):
         return "Describes the weather in a random city."
@@ -431,30 +471,15 @@ class RandomWeather(BaseExpert):
         return [
             "tell me the weather in a random city",
             "random weather",
+            "give me a random weather report",
+            "random weather report",
         ]
 
     def generate(self, lmoe_query: LmoeQuery):
-        city_json = get_random_city()
-        weather_json = get_weather_json(city_json)
-        weather_json["city"] = city_json["city"]
-        weather_json["country"] = city_json["country"]
-        weather_code = weather_json["weather_code"]
-        weather_json["description"] = (
-            _WMO_INTERPRETATION_CODES[weather_code]
-            if weather_code in _WMO_INTERPRETATION_CODES
-            else ""
-        )
-        del weather_json["weather_code"]
-        del weather_json["time"]
-        del weather_json["interval"]
-        stream = ollama.generate(
-            model="lmoe_random_weather",
-            prompt=str(weather_json),
-            stream=True,
-        )
-        for chunk in stream:
-            if chunk["response"] or not chunk["done"]:
-                print(chunk["response"], end="", flush=True)
+        weather_report = WeatherReport.current(City.random())
+
+        for chunk in stream(model=self.model, prompt=weather_report.json()):
+            print(chunk, end="", flush=True)
         print("")
 ```
 
@@ -501,7 +526,7 @@ from lmoe.framework.expert_registry import expert
 class GeneralRude(General):
 
     @classmethod
-    def has_modelfile(cls):
+    def has_model(cls):
         return False
 
     def generate(self, lmoe_query: LmoeQuery):
@@ -548,7 +573,7 @@ class PrintArgs(BaseExpert):
         return "PRINT_ARGS"
 
     @classmethod
-    def has_modelfile(cls):
+    def has_model(cls):
         return False
 
     def description(self):
@@ -598,8 +623,7 @@ Namespace(query=['print', 'args'], paste=False, classify=False, classifier_model
 
 Version 0.3.7
 
-Supports a general expert and image recognition. Limited automation for environment setup, no
-persistence.
+Supports a general expert and image recognition.
 
 This is currently a very basic implementation, but may be useful to others.
 
@@ -608,7 +632,6 @@ The extension model is working, but is not guaranteed to be a stable API.
 ### Upcoming features
 
 * error handling
-* self-setup of models and ollama context after installation
 * persisted context (i.e. memory, chat-like experience without a formal chat interface)
 * configurability
 * tests
@@ -623,6 +646,7 @@ The extension model is working, but is not guaranteed to be a stable API.
   * API clients
     * weather
     * wikipedia
+* openAI API integration
 
 ## Lmoe Armadillo
 

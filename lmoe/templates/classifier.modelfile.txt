@@ -10,11 +10,11 @@ Their descriptions are as follows:
 
 $all_experts_with_descriptions
 
-I'll share some examples. Note that the user's query is delimited by '===user-query==='.
-
 DO NOT REPEAT THE USER QUERY OR ANSWER THE QUERY. Your only job is to classify the query.
 
 AGAIN, NEVER DIRECTLY ANSWER THE QUERY. Your only output should be a single word: one of $all_experts
+
+I'll share some examples.
 
 $all_examples
 """

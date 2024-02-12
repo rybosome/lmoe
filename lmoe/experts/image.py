@@ -1,4 +1,4 @@
-from lmoe.api.base_expert import BaseExpert
+from lmoe.api.model_expert import ModelExpert
 from lmoe.api.lmoe_query import LmoeQuery
 from lmoe.framework.expert_registry import expert
 
@@ -10,6 +10,7 @@ import requests
 
 
 def extract_base64(input_string):
+    """Extract base64 from text which may include whitespace or non-base64 data."""
     # Use regular expression to extract Base64 data
     match = re.search(r"\s*(user_context:)?\s*([A-Za-z0-9+/]+={0,2})", input_string)
     if match:
@@ -25,6 +26,7 @@ def extract_base64(input_string):
 
 
 def check_base64(s):
+    """Verifies that a base64 string is valid."""
     try:
         if not s.isascii():
             print("s is not ascii")
@@ -38,15 +40,11 @@ def check_base64(s):
 
 
 @expert
-class Image(BaseExpert):
+class Image(ModelExpert):
 
     @classmethod
     def name(cls):
         return "IMAGE"
-
-    @classmethod
-    def has_modelfile(cls):
-        return True
 
     def description(self):
         return "Analyzes the contents of images and answers questions about them."

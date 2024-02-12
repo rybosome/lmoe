@@ -27,8 +27,7 @@ class LmoeQuery:
     paste_context: Optional[str]
     user_query: str
 
-    def render(self) -> str:
-        """Render all context and the query into a form suitable for sending to an lmoe model."""
+    def __str__(self) -> str:
         return _PROMPT_TEMPLATE.substitute(
             stdin_context=self.stdin_context,
             paste_context=self.paste_context,
