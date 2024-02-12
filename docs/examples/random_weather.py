@@ -88,6 +88,7 @@ class WMOInterpretationCode(Enum):
 @dataclass(frozen=True)
 class WeatherReport:
     """A description of weather conditions in a particular moment - (only current supported)."""
+
     city: City
     temperature_2m: str
     relative_humidity_2m: int
@@ -132,6 +133,7 @@ class WeatherReport:
                 response["weather_code"]
             ),
         )
+
 
 class RandomWeatherModel(Model):
     """A model instructed to summarize JSON blobs about weather in natural language."""
