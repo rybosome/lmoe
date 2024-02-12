@@ -621,7 +621,7 @@ Namespace(query=['print', 'args'], paste=False, classify=False, classifier_model
 
 ## Status
 
-Version 0.3.8
+Version 0.3.9
 
 Supports a general expert and image recognition.
 
