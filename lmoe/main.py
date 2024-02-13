@@ -37,7 +37,11 @@ def run():
 
     # Import the plugin Python module
     plugin_path = f"{plugin_parent_path}/lmoe_plugins"
-    import_experts(plugin_path)
+    try:
+        import_experts(plugin_path)
+    except FileNotFoundError as e:
+        # Ignore for now, only notify that no plugins were loaded.
+        print(f"No plugins loaded from {plugin_path}")
 
     # Carry on with app instantiation, install native and plugin injection modules
     modules = [NativeModule]
