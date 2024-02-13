@@ -93,7 +93,7 @@ class Classifier(ModelExpert):
 
     def classify(self, user_query):
         model_response = ollama.generate(
-            model="lmoe_classifier",
+            model=self.model.ollama_name(),
             prompt=_PROMPT_TEMPLATE.substitute(user_query=user_query),
         )
         unescaped_model_response = model_response["response"].replace(r"\_", "_")
