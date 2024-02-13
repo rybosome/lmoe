@@ -693,7 +693,7 @@ Namespace(query=['print', 'args'], paste=False, classify=False, classifier_model
 
 ## Status
 
-Version 0.3.11
+Version 0.3.12
 
 Supports the following core experts:
 
