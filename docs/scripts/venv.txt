@@ -1,0 +1,44 @@
+$VENVS_DIR = "$HOME/.venvs"
+
+venv () {
+	if [[ $# -lt 1 ]]
+	then
+		echo "Usage: venv <command> [args]"
+		exit 1
+	fi
+	command="$1"
+	shift
+	case "$command" in
+		(mkdir) if [[ $# -lt 1 ]]
+			then
+				echo "Usage: venv mkdir <env_name>"
+				exit 1
+			fi
+			env_name="$1"
+			env_path="$VENVS_DIR/$env_name"
+			python3 -m venv "$env_path" ;;
+		(ls) ls "$VENVS_DIR" ;;
+		(rm) if [[ $# -lt 1 ]]
+			then
+				echo "Usage: venv rm <env_name>"
+				exit 1
+			fi
+			env_name="$1"
+			env_path="$VENVS_DIR/$env_name"
+			echo "Do you want to remove $env_name? (y/n): \c"
+			read confirm
+			if [[ $confirm == "y" ]]
+			then
+				rm -rf "$env_path"
+			fi ;;
+		(activate) env_path="$VENVS_DIR/$env_name"
+			if [ -z "$1" ]
+			then
+				. "$VENVS_DIR/default/bin/activate"
+			else
+				. "$VENVS_DIR/$1/bin/activate"
+			fi ;;
+		(*) echo "Unknown command. Available commands: mkdir, ls, rm, activate"
+			exit 1 ;;
+	esac
+}
