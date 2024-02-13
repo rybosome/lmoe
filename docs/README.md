@@ -12,9 +12,22 @@ interact with highly configurable AI models from the command line.
 
 ### Dependencies
 
-Ensure that an [Ollama](https://github.com/ollama/ollama) server is running.
+#### Virtual environment
 
 It is recommended to install `lmoe` in a [virtual environment](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/).
+
+I use [this script](https://github.com/rybosome/lmoe/blob/main/docs/scripts/venv.txt) to make them simpler to manage.
+
+```
+% venv mkdir lmoe
+% venv activate lmoe
+(lmoe) % 
+```
+
+#### Ollama
+
+Ensure that an [Ollama](https://github.com/ollama/ollama) server is running.
+
 
 ### Installation & Initialization
 
@@ -23,13 +36,17 @@ It is recommended to install `lmoe` in a [virtual environment](https://packaging
 % lmoe --initialize
 ```
 
-This will download any base Ollama models and create `lmoe`-internal models.
+This will download any base Ollama models not present on your machine and create `lmoe`-internal models.
 
 `lmoe` is now ready to use!
 
 ## Overview
 
 `lmoe` is your CLI assistant. It [classifies](https://github.com/rybosome/lmoe/blob/main/lmoe/templates/classifier.modelfile.txt) your query to one of its various [experts](https://github.com/rybosome/lmoe/tree/main/lmoe/experts), which are [specializations](https://github.com/rybosome/lmoe/tree/main/lmoe/templates) of various [open-weight models](https://ollama.com/library).
+
+See [more on the architecture](#architecture) below.
+
+**NOTE**: All examples below are real interactions with `lmoe` except where explicitly noted.
 
 ### Natural language querying
 ```
@@ -98,6 +115,8 @@ lmoe "make a project like this for a module called 'alexandria' with 3 sub modul
  touch alexandria/src/alexandria/io/
  touch alexandria/src/alexandria/io/__init__.py
 ```
+
+
 
 ## Capabilities
 
@@ -237,10 +256,62 @@ Updating lmoe_general...
 {'name': 'lmoe_project_initialization:latest', 'model': 'lmoe_project_initialization:latest', 'modified_at': '2024-02-05T13:46:49.991328433-08:00', 'size': 4109868075, 'digest': '9af2d395e8883910952bee2668d18131206fb5c612bc5d4a207b6637e1bc6907', 'details': {'parent_model': '', 'format': 'gguf', 'family': 'llama', 'families': ['llama'], 'parameter_size': '7B', 'quantization_level': 'Q4_0'}}
 ```
 
+## Architecture
+
+`lmoe` is a [directed acyclic graph](https://en.wikipedia.org/wiki/Directed_acyclic_graph) of
+intelligent agents.
+
+![Legend for an lmoe architecture diagram](https://rybosome.github.io/lmoe/assets/lmoe-architecture-legend.png)
+
+Nodes may be one of three types:
+
+*  **Classifier** - Determines how to route a query to a sub-expert
+*  **Action** - Generates a response from a model, or takes some other action
+*  **Library** - Uses an underlying model to interpret intent, or generate part of a response
+
+### Current
+
+![Current architecture of lmoe](https://rybosome.github.io/lmoe/assets/lmoe-architecture-current.png)
+
+`lmoe` is currently very basic. A small classifier routes between a few top-level nodes. Additional nodes not pictured:
+
+ * Code: Generates code. Needs to be tuned and hooked to a different code model.
+ * Nodes for operational commands like refreshing and listing models
+
+### Future Additions
+
+![Multi level classification](https://rybosome.github.io/lmoe/assets/lmoe-architecture-future.png)
+
+Early testing suggests that single, large classification prompting with lots of examples scales
+poorly, but nested levels with small classifiers may scale better. For now, there is only one
+classifier at the root. In the future, `lmoe` will support trees of classification.
+
+![Library dependencies](https://rybosome.github.io/lmoe/assets/lmoe-architecture-future-with-deps.png)
+
+More advanced functionality can be enabled with library agents which rely on an underlying model to
+deliver part of a response.
+
+For instance, understanding filesystem intent - "/Users/me/Documents/document.text",
+"this directory", "somewhere in my downloads folder" - and reading the data can be an intermediate
+task which allows other agents to function better.
+
+This would allow simpler usage of, for instance, the image recognition agent. Instead of having to
+base64 the contents of an image ourselves, we could do:
+
+```
+### THIS IS AN EXAMPLE, NOT A REAL INTERACTION ###
+% lmoe what is in the pic at /Users/me/Pictures/picture.png
+There is a black and tan dog looking up at the camera with a cute expression on its face. The
+background is a colorful blend of autumn leaves.
+```
+
 ## Extension Model
 
 New capabilities can be added to `lmoe` with low overhead. All capabilities, internal and
 user-defined, are implemented with the same programming model.
+
+An `Expert` is implemented and registered with the root classifier, and can respond to user queries
+programmatically, through a model, or with a mix of both.
 
 To get started, create a directory structure like this:
 
@@ -263,7 +334,8 @@ First, create a modelfile under `$HOME/lmoe_plugins/lmoe_plugins/random_weather.
 ```
 FROM mistral
 SYSTEM """
-Your job is to summarize a JSON object which has information about the current weather in a given city. You are to give a natural language description of the weather conditions.
+Your job is to summarize a JSON object which has information about the current weather in a given
+city. You are to give a natural language description of the weather conditions.
 
 Here are the keys of the JSON object.
 
@@ -621,9 +693,16 @@ Namespace(query=['print', 'args'], paste=False, classify=False, classifier_model
 
 ## Status
 
-Version 0.3.9
+Version 0.3.10
 
-Supports a general expert and image recognition.
+Supports the following core experts:
+
+ * general
+ * image recognition
+ * project initialization
+ * code
+
+Tuning of each is needed.
 
 This is currently a very basic implementation, but may be useful to others.
 
@@ -637,6 +716,7 @@ The extension model is working, but is not guaranteed to be a stable API.
 * tests
 * further tuning of classification, code generation, and project initialization
 * dry-run for mutating actions, ability to execute mutating actions
+* RAG agent
 * many more commands
   * filesystem interaction
     * finding file contents from various queries (specific file path, fuzzy description, "this directory", etc.)
