@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "lmoe"
-version = "0.3.12"
+version = "0.3.13"
 description = "lmoe (Layered Mixture of Experts,'Elmo') is your programmable CLI assistant."
 authors = ["Ryan Eiger <ryebosome@gmail.com>"]
 readme = "README.md"
