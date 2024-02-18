@@ -20,7 +20,7 @@ class Initialize(Command):
     def _get_all_base_models(self):
         base_models = set()
         for expert in [e for e in self.expert_registry.experts() if e.has_model()]:
-            modelfile_contents = expert.model.modelfile_contents()
+            modelfile_contents = expert.model().modelfile_contents()
             match = re.match(r"FROM ([^\s]+).*", modelfile_contents)
             if match:
                 base_models.add(match.group(1))
