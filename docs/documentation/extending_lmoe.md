@@ -68,7 +68,7 @@ agent: Ribeirão das Neves, Brazil is currently 75 degrees and overcast. There h
 
 Then, let's create an API class to handle fetching random weather JSON like this, `random_weather_api.py`.
 
-```
+```python
 import json
 import random
 import requests
