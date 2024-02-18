@@ -10,7 +10,7 @@ These examples assume the following [configuration](https://rybosome.github.io/l
 
 ```
 plugins = [
-    {path = "/Users/me/lmoe_plugins", package_name = "example_plugins"}
+    {path = "/Users/me/docs/examples", package_name = "lmoe_plugins"}
 ]
 ```
 
@@ -66,22 +66,24 @@ agent: Ribeirão das Neves, Brazil is currently 75 degrees and overcast. There h
 """
 ```
 
-Then, let's create an expert class to generate this JSON object and pass it to the summarizer at `$HOME/lmoe_plugins/example_plugins/random_weather.py`.
+Then, let's create an API class to handle fetching random weather JSON like this, `random_weather_api.py`.
 
-```python
+```
 import json
-import ollama
-import os
 import random
 import requests
 
 from dataclasses import asdict, dataclass
 from enum import Enum
-from lmoe.api.lmoe_query import LmoeQuery
-from lmoe.api.model import Model
-from lmoe.api.model_expert import ModelExpert
-from lmoe.api.ollama_client import stream
-from lmoe.framework.expert_registry import expert
+
+
+def clean_dict(d, keys_to_keep):
+    """Returns the dict passed in, with only the keys in keys_to_keep.
+
+    Useful for instantiating dataclasses from JSON objects via kwargs, where the JSON objects may
+    have properties not part of the dataclass.
+    """
+    return {key: value for key, value in d.items() if key in keys_to_keep}
 
 
 @dataclass(frozen=True)
@@ -106,10 +108,7 @@ class City:
         r = requests.get(cls._RANDOM_CITY_URL_TEMPLATE.format(random_number))
         json = r.json()["data"][0]
         return City(
-            name=json["city"],
-            country=json["country"],
-            latitude=json["latitude"],
-            longitude=json["longitude"],
+            name=json["city"], **clean_dict(json, ["country", "latitude", "longitude"])
         )
 
 
@@ -159,6 +158,7 @@ class WMOInterpretationCode(Enum):
 @dataclass(frozen=True)
 class WeatherReport:
     """A description of weather conditions in a particular moment - (only current supported)."""
+
     city: City
     temperature_2m: str
     relative_humidity_2m: int
@@ -174,8 +174,7 @@ class WeatherReport:
 
     def json(self) -> str:
         """Returns a JSON string."""
-        partial_dict = asdict(self)
-        return json.dumps(partial_dict)
+        return json.dumps(asdict(self))
 
     @classmethod
     def current(cls, city: City) -> "WeatherReport":
@@ -192,17 +191,42 @@ class WeatherReport:
         response = r.json()["current"]
         return WeatherReport(
             city=city,
-            temperature_2m=response["temperature_2m"],
-            relative_humidity_2m=response["relative_humidity_2m"],
-            cloud_cover=response["cloud_cover"],
-            wind_speed_10m=response["wind_speed_10m"],
-            rain=response["rain"],
-            showers=response["showers"],
-            snowfall=response["snowfall"],
             weather_description=WMOInterpretationCode.describe(
                 response["weather_code"]
             ),
+            **clean_dict(
+                response,
+                [
+                    "temperature_2m",
+                    "relative_humidity_2m",
+                    "cloud_cover",
+                    "wind_speed_10m",
+                    "rain",
+                    "showers",
+                    "snowfall",
+                ],
+            )
         )
+
+    @classmethod
+    def random(cls) -> "WeatherReport":
+        city = City.random()
+        return cls.current(city)
+```
+
+Finally, an expert class to generate this JSON object and pass it to the summarizer at `lmoe_plugins/random_weather.py`.
+
+```python
+import os
+
+from injector import inject
+from lmoe.api.lmoe_query import LmoeQuery
+from lmoe.api.model import Model
+from lmoe.api.model_expert import ModelExpert
+from lmoe.framework.expert_registry import expert
+from lmoe.framework.ollama_client import OllamaClient
+from lmoe_plugins.random_weather_api import WeatherReport
+
 
 class RandomWeatherModel(Model):
     """A model instructed to summarize JSON blobs about weather in natural language."""
@@ -213,7 +237,9 @@ class RandomWeatherModel(Model):
     @classmethod
     def modelfile_name(cls):
         home_dir = os.environ.get("HOME")
-        return f"{home_dir}/lmoe_plugins/example_plugins/random_weather.modelfile.txt"
+        return os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "random_weather.modelfile.txt"
+        )
 
     def modelfile_contents(self):
         with open(self.modelfile_name(), "r") as file:
@@ -224,7 +250,9 @@ class RandomWeatherModel(Model):
 class RandomWeather(ModelExpert):
     """An expert which retrieves a random weather report in JSON and summarizes it."""
 
-    def __init__(self):
+    @inject
+    def __init__(self, ollama_client: OllamaClient):
+        self._ollama_client = ollama_client
         super(RandomWeather, self).__init__(RandomWeatherModel())
 
     @classmethod
@@ -243,11 +271,8 @@ class RandomWeather(ModelExpert):
         ]
 
     def generate(self, lmoe_query: LmoeQuery):
-        weather_report = WeatherReport.current(City.random())
-
-        for chunk in stream(model=self.model, prompt=weather_report.json()):
-            print(chunk, end="", flush=True)
-        print("")
+        weather_report = WeatherReport.random()
+        self._ollama_client.stream(model=self.model(), prompt=weather_report.json())
 ```
 
 Refresh, and try out your new capability.
@@ -280,7 +305,7 @@ wavelengths, like red or orange. As a result, the sky predominantly reflects and
 light, making it appear blue during a clear day.
 ```
 
-Start by creating your new expert under `$HOME/lmoe_plugins/example_plugins/general_rude.py`, and
+Start by creating your new expert under `lmoe_plugins/general_rude.py`, and
 inherit from the base expert you wish to override.
 
 ```python
@@ -318,7 +343,7 @@ framework, you can do so.
 
 This relies on the [injector](https://pypi.org/project/injector/) framework.
 
-First, create a new expert under `$HOME/lmoe_plugins/example_plugins/print_args.py`.
+First, create a new expert under `lmoe_plugins/print_args.py`.
 
 ```python
 from injector import inject
@@ -357,7 +382,7 @@ class PrintArgs(BaseExpert):
         print(self.parsed_args)
 ```
 
-Then, create a [Module](https://injector.readthedocs.io/en/latest/api.html#injector.Module) under `$HOME/lmoe_plugins/example_plugins/lmoe_plugin_module.py`.
+Then, create a [Module](https://injector.readthedocs.io/en/latest/api.html#injector.Module) under `lmoe_plugins/lmoe_plugin_module.py`.
 
 ```python
 from injector import Module, provider, singleton
