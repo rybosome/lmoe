@@ -6,8 +6,10 @@ import requests
 
 from dataclasses import asdict, dataclass
 from enum import Enum
-from lmoe.api.base_expert import BaseExpert
 from lmoe.api.lmoe_query import LmoeQuery
+from lmoe.api.model import Model
+from lmoe.api.model_expert import ModelExpert
+from lmoe.api.ollama_client import stream
 from lmoe.framework.expert_registry import expert
 
 
@@ -133,16 +135,11 @@ class WeatherReport:
         )
 
 
-@expert
-class RandomWeather(BaseExpert):
+class RandomWeatherModel(Model):
+    """A model instructed to summarize JSON blobs about weather in natural language."""
 
-    @classmethod
-    def name(cls):
-        return "RANDOM_WEATHER"
-
-    @classmethod
-    def has_modelfile(cls):
-        return True
+    def __init__(self):
+        super(RandomWeatherModel, self).__init__("RANDOM_WEATHER")
 
     @classmethod
     def modelfile_name(cls):
@@ -152,6 +149,18 @@ class RandomWeather(BaseExpert):
     def modelfile_contents(self):
         with open(self.modelfile_name(), "r") as file:
             return file.read()
+
+
+@expert
+class RandomWeather(ModelExpert):
+    """An expert which retrieves a random weather report in JSON and summarizes it."""
+
+    def __init__(self):
+        super(RandomWeather, self).__init__(RandomWeatherModel())
+
+    @classmethod
+    def name(cls):
+        return "RANDOM_WEATHER"
 
     def description(self):
         return "Describes the weather in a random city."
@@ -165,15 +174,8 @@ class RandomWeather(BaseExpert):
         ]
 
     def generate(self, lmoe_query: LmoeQuery):
-        city = City.random()
-        weather_report = WeatherReport.current(city)
+        weather_report = WeatherReport.current(City.random())
 
-        stream = ollama.generate(
-            model="lmoe_random_weather",
-            prompt=weather_report.json(),
-            stream=True,
-        )
-        for chunk in stream:
-            if chunk["response"] or not chunk["done"]:
-                print(chunk["response"], end="", flush=True)
+        for chunk in stream(model=self.model, prompt=weather_report.json()):
+            print(chunk, end="", flush=True)
         print("")

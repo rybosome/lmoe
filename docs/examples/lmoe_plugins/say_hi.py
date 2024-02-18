@@ -5,6 +5,7 @@ from lmoe.experts.personality import Personality
 from lmoe.framework.expert_registry import expert
 
 
+@expert
 class SayHi(BaseExpert):
 
     @inject
@@ -16,7 +17,7 @@ class SayHi(BaseExpert):
         return "SAY_HI"
 
     @classmethod
-    def has_modelfile(cls):
+    def has_model(cls):
         return False
 
     def description(self):
