@@ -10,12 +10,15 @@ class ModelExpert(BaseExpert):
     """A basic expert which is backed by a model with the same name as the expert."""
 
     def __init__(self, model: Optional[Model] = None):
-        self.model = model if model is not None else Model(self.name())
+        if model is None:
+            self._model = Model(self.name())
+        else:
+            self._model = model
 
     @classmethod
     def has_model(cls):
         return True
 
-    def model(self) -> Optional[Model]:
+    def model(self) -> Model:
         """ "The underlying model, if this is model-backed."""
-        return self.model
+        return self._model

@@ -42,13 +42,15 @@ class Refresh(BaseExpert):
         ]
         all_lmoe_models = set(
             [
-                e.model.ollama_name()
+                e.model().ollama_name()
                 for e in self.expert_registry.experts()
                 if e.has_model()
             ]
         )
         print("Refreshing Ollama's models: ", all_lmoe_models)
-        for model in [e.model for e in self.expert_registry.experts() if e.has_model()]:
+        for model in [
+            e.model() for e in self.expert_registry.experts() if e.has_model()
+        ]:
             print(f"  {model.ollama_name()}")
             if model.ollama_name() in existing_model_names:
                 print(f"    Deleting...")

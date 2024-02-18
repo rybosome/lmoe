@@ -1,8 +1,9 @@
+from injector import inject
 from lmoe.api.lmoe_query import LmoeQuery
 from lmoe.api.model import Model
 from lmoe.api.model_expert import ModelExpert
-from lmoe.api.ollama_client import stream
 from lmoe.framework.expert_registry import expert
+from lmoe.framework.ollama_client import OllamaClient
 from lmoe.utils.templates import (
     Example,
     read_template,
@@ -30,8 +31,10 @@ class PersonalityModel(Model):
 # @expert
 class Personality(ModelExpert):
 
-    def __init__(self):
+    @inject
+    def __init__(self, ollama_client: OllamaClient):
         self.examples = read_yaml_examples("personality.examples.yaml")
+        self._ollama_client = ollama_client
         super(Personality, self).__init__(PersonalityModel())
 
     @classmethod
@@ -45,6 +48,4 @@ class Personality(ModelExpert):
         return [example.user_query for example in self.examples]
 
     def generate(self, lmoe_query: LmoeQuery):
-        for chunk in stream(model=self.model, prompt=lmoe_query):
-            print(chunk, end="", flush=True)
-        print("")
+        self._ollama_client.stream(model=self.model(), prompt=lmoe_query)

@@ -4,6 +4,7 @@ from lmoe.api.model_expert import ModelExpert
 from lmoe.api.model import Model
 from lmoe.experts.general import General
 from lmoe.framework.expert_registry import ExpertRegistry, expert
+from lmoe.framework.lmoe_logger import LogFactory
 from lmoe.utils.templates import read_template
 from typing import List
 from string import Template
@@ -74,8 +75,14 @@ class ClassifierModel(Model):
 class Classifier(ModelExpert):
 
     @inject
-    def __init__(self, expert_registry: ExpertRegistry, model: ClassifierModel):
+    def __init__(
+        self,
+        expert_registry: ExpertRegistry,
+        model: ClassifierModel,
+        log_factory: LogFactory,
+    ):
         self.expert_registry = expert_registry
+        self.logger = log_factory.logger(__name__)
         super(Classifier, self).__init__(model)
 
     @classmethod
@@ -92,13 +99,19 @@ class Classifier(ModelExpert):
         return all_example_queries
 
     def classify(self, user_query):
+        self.logger.debug("Classifying user query")
         model_response = ollama.generate(
-            model=self.model.ollama_name(),
+            model=self.model().ollama_name(),
             prompt=_PROMPT_TEMPLATE.substitute(user_query=user_query),
         )
         unescaped_model_response = model_response["response"].replace(r"\_", "_")
         for name in self.expert_registry.names():
             match = re.match(f"^[\s]*{name}.*", unescaped_model_response)
             if match:
+                self.logger.debug(f"Classification: {name}")
                 return name
+        self.logger.debug(
+            f"Could not match model classification: {unescaped_model_response}"
+        )
+        self.logger.debug("Using GENERAL")
         return General.name()

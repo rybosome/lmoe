@@ -1,11 +1,17 @@
+from injector import inject
 from lmoe.api.model_expert import ModelExpert
 from lmoe.api.lmoe_query import LmoeQuery
-from lmoe.api.ollama_client import stream
+from lmoe.framework.ollama_client import OllamaClient
 from lmoe.framework.expert_registry import expert
 
 
 @expert
 class Code(ModelExpert):
+
+    @inject
+    def __init__(self, ollama_client: OllamaClient):
+        self._ollama_client = ollama_client
+        super(Code, self).__init__()
 
     @classmethod
     def name(cls):
@@ -20,6 +26,4 @@ class Code(ModelExpert):
         ]
 
     def generate(self, lmoe_query: LmoeQuery):
-        for chunk in stream(self.model, lmoe_query):
-            print(chunk, end="", flush=True)
-        print("")
+        self._ollama_client.stream(self.model(), lmoe_query)
