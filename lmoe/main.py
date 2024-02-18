@@ -1,5 +1,6 @@
 from injector import Injector
 from lmoe.commands.command_runner import CommandRunner
+from lmoe.framework.config import LmoeConfig
 from lmoe.framework.native_module import NativeModule
 from lmoe.framework.plugin_module_registry import PluginModuleRegistry
 
@@ -23,25 +24,25 @@ def import_experts(package_path):
 
 
 def run():
+    # Load lmoe config
+    lmoe_config = LmoeConfig.load()
+
     # Dynamically import native experts
     native_path = os.path.dirname(lmoe.experts.__file__)
     import_experts(native_path)
 
-    # Dynamically import plugin experts
-    # TODO: support for configuring the plugin directory, naming, etc.
-    home_directory = os.path.expanduser("~")
+    # Dynamically import plugin experts, paths are defined in $HOME/.lmoeconfig
+    for lmoe_plugins in lmoe_config.lmoe_plugins or []:
+        # Add the parent plugin directory to the Python path
+        sys.path.append(lmoe_plugins.path)
+        plugin_path = os.path.join(lmoe_plugins.path, lmoe_plugins.package_name)
 
-    # Add the parent plugin directory to the Python path
-    plugin_parent_path = f"{home_directory}/lmoe_plugins"
-    sys.path.append(plugin_parent_path)
-
-    # Import the plugin Python module
-    plugin_path = f"{plugin_parent_path}/lmoe_plugins"
-    try:
-        import_experts(plugin_path)
-    except FileNotFoundError as e:
-        # Ignore for now, only notify that no plugins were loaded.
-        print(f"No plugins loaded from {plugin_path}")
+        # Import the plugin Python modules
+        try:
+            import_experts(plugin_path)
+        except FileNotFoundError as e:
+            # Ignore for now, only notify that no plugins were loaded.
+            print(f"No plugins loaded from {plugin_path}")
 
     # Carry on with app instantiation, install native and plugin injection modules
     modules = [NativeModule]

@@ -6,15 +6,42 @@ user-defined, are implemented with the same programming model.
 An `Expert` is implemented and registered with the root classifier, and can respond to user queries
 programmatically, through a model, or with a mix of both.
 
-To get started, create a directory structure like this:
+To get started, create an `lmoe` config file in your `$HOME` directory.
 
 ```
-% mkdir -p "$HOME/lmoe_plugins/lmoe_plugins"
+% touch "$HOME/.lmoeconfig"
+```
+
+Populate the `plugin` entry, which allows `lmoe` to dynamically load your plugin package at runtime.
+Multiple plugin packages can be loaded.
+
+```
+plugins = [
+    {path = "<path to a directory containing {package_name}>", package_name="<name of your package.>"}
+]
+```
+
+For example, if I have the following directory structure:
+
+```
+/Users/me/lmoe_plugins
+|  | /example_plugins
+|  |  | __init__.py
+|  |  | example_expert_1.py
+|  |  | example_expert_2.py
+```
+
+Then I'd have the following `.lmoeconfig`:
+
+```
+plugins = [
+    {path = "/Users/me/lmoe_plugins", package_name = "example_plugins"}
+]
 ```
 
 ## All samples
 
-See the [examples](https://github.com/rybosome/lmoe/main/docs/examples/lmoe_plugins) directory.
+See the [examples](https://github.com/rybosome/lmoe/tree/main/docs/examples/lmoe_plugins) directory.
 
 Here are some to get started.
 
@@ -22,7 +49,7 @@ Here are some to get started.
 
 Let's add an expert which describes the weather in a random city.
 
-First, create a modelfile under `$HOME/lmoe_plugins/lmoe_plugins/random_weather.modelfile.txt`.
+First, create a modelfile: `random_weather.modelfile.txt`
 
 ```
 FROM mistral
@@ -64,7 +91,7 @@ agent: Ribeirão das Neves, Brazil is currently 75 degrees and overcast. There h
 """
 ```
 
-Then, let's create an expert class to generate this JSON object and pass it to the summarizer at `$HOME/lmoe_plugins/lmoe_plugins/random_weather.py`.
+Then, let's create an expert class to generate this JSON object and pass it to the summarizer at `$HOME/lmoe_plugins/example_plugins/random_weather.py`.
 
 ```python
 import json
@@ -211,7 +238,7 @@ class RandomWeatherModel(Model):
     @classmethod
     def modelfile_name(cls):
         home_dir = os.environ.get("HOME")
-        return f"{home_dir}/lmoe_plugins/lmoe_plugins/random_weather.modelfile.txt"
+        return f"{home_dir}/lmoe_plugins/example_plugins/random_weather.modelfile.txt"
 
     def modelfile_contents(self):
         with open(self.modelfile_name(), "r") as file:
@@ -278,7 +305,7 @@ wavelengths, like red or orange. As a result, the sky predominantly reflects and
 light, making it appear blue during a clear day.
 ```
 
-Start by creating your new expert under `$HOME/lmoe_plugins/lmoe_plugins/general_rude.py`, and
+Start by creating your new expert under `$HOME/lmoe_plugins/example_plugins/general_rude.py`, and
 inherit from the base expert you wish to override.
 
 ```python
@@ -316,7 +343,7 @@ framework, you can do so.
 
 This relies on the [injector](https://pypi.org/project/injector/) framework.
 
-First, create a new expert under `$HOME/lmoe_plugins/lmoe_plugins/print_args.py`.
+First, create a new expert under `$HOME/lmoe_plugins/example_plugins/print_args.py`.
 
 ```python
 from injector import inject
@@ -355,12 +382,12 @@ class PrintArgs(BaseExpert):
         print(self.parsed_args)
 ```
 
-Then, create a [Module](https://injector.readthedocs.io/en/latest/api.html#injector.Module) under `$HOME/lmoe_plugins/lmoe_plugins/lmoe_plugin_module.py`.
+Then, create a [Module](https://injector.readthedocs.io/en/latest/api.html#injector.Module) under `$HOME/lmoe_plugins/example_plugins/lmoe_plugin_module.py`.
 
 ```python
 from injector import Module, provider, singleton
 from lmoe.framework.plugin_module_registry import plugin_module
-from lmoe_plugins.print_args import PrintArgs
+from example_plugins.print_args import PrintArgs
 
 import argparse
 
