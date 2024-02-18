@@ -6,32 +6,7 @@ user-defined, are implemented with the same programming model.
 An `Expert` is implemented and registered with the root classifier, and can respond to user queries
 programmatically, through a model, or with a mix of both.
 
-To get started, create an `lmoe` config file in your `$HOME` directory.
-
-```
-% touch "$HOME/.lmoeconfig"
-```
-
-Populate the `plugin` entry, which allows `lmoe` to dynamically load your plugin package at runtime.
-Multiple plugin packages can be loaded.
-
-```
-plugins = [
-    {path = "<path to a directory containing {package_name}>", package_name="<name of your package.>"}
-]
-```
-
-For example, if I have the following directory structure:
-
-```
-/Users/me/lmoe_plugins
-|  | /example_plugins
-|  |  | __init__.py
-|  |  | example_expert_1.py
-|  |  | example_expert_2.py
-```
-
-Then I'd have the following `.lmoeconfig`:
+These examples assume the following [configuration](https://rybosome.github.io/lmoe/documentation/configuring_lmoe.html):
 
 ```
 plugins = [

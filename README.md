@@ -224,6 +224,7 @@ Coming soon: `lmoe` will offer to run them for you, open them in an editor, or s
 ## Documentation
 
 * [Architecture](https://rybosome.github.io/lmoe/documentation/architecture.html)
+* [Configuration](https://rybosome.github.io/lmoe/documentation/configuring_lmoe.html)
 * [Programming model](https://rybosome.github.io/lmoe/documentation/extending_lmoe.html)
 * [Roadmap](https://rybosome.github.io/lmoe/documentation/roadmap.html)
 * [Utilities](https://rybosome.github.io/lmoe/documentation/utilities.html)
