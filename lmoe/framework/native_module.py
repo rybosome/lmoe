@@ -3,6 +3,7 @@ from lmoe.api.lmoe_query import LmoeQuery
 from typing import Optional
 
 import argparse
+import logging
 import pyperclip
 import sys
 
@@ -50,6 +51,9 @@ class NativeModule(Module):
         )
         parser.add_argument(
             "--refresh", action="store_true", help="Force a modelfile refresh."
+        )
+        parser.add_argument(
+            "--debug", action="store_true", help="Outputs debug text while executing."
         )
 
         return parser.parse_args()
