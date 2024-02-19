@@ -21,6 +21,13 @@ pytest = "^8.0.1"
 lmoe = "lmoe.main:run"
 lmoe_update_docs = "lmoe.release:update_readme_version"
 
+[[tool.poetry.repositories]]
+name = "test"
+url = "https://test.pypi.org/simple/"
+
+[[tool.poetry.repositories]]
+name = "prod"
+url = "https://pypi.org/simple/"
 
 [build-system]
 requires = ["poetry-core"]
