@@ -2,6 +2,7 @@ import pytest
 
 from lmoe.framework.module_loader import load_native_and_plugin_modules
 
+
 @pytest.fixture(scope="module")
 def real_injector():
     """Returns the real injector used by the execution path.
