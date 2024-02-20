@@ -27,6 +27,10 @@ class LmoeQuery:
     paste_context: Optional[str]
     user_query: str
 
+    @classmethod
+    def empty(cls) -> "LmoeQuery":
+        return LmoeQuery(stdin_context=None, paste_context=None, user_query="")
+
     def __str__(self) -> str:
         return _PROMPT_TEMPLATE.substitute(
             stdin_context=self.stdin_context,
