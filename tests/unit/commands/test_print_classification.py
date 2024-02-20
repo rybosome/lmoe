@@ -12,7 +12,7 @@ def test_cmd(real_injector):
     yield real_injector.get(PrintClassification)
 
 
-class TestPrintClassifierModelfile:
+class TestPrintClassification:
 
     def _assert_classification(
         self, test_cmd: PrintClassification, query: str, classification: str
