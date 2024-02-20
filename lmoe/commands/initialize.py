@@ -1,13 +1,9 @@
 import argparse
-import ollama
-import re
 
 from dataclasses import dataclass
 from injector import inject
 from lmoe.api.lmoe_query import LmoeQuery
 from lmoe.commands.command import Command
-from lmoe.experts.refresh import Refresh
-from lmoe.framework.expert_registry import ExpertRegistry
 from lmoe.framework.model_registry import ModelRegistry
 from lmoe.framework.ollama_client import OllamaClient
 
@@ -16,7 +12,6 @@ from lmoe.framework.ollama_client import OllamaClient
 @dataclass
 class Initialize(Command):
 
-    expert_registry: ExpertRegistry
     model_registry: ModelRegistry
     ollama_client: OllamaClient
 
