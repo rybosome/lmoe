@@ -89,6 +89,12 @@ class OllamaClient:
                 yield current_message
             last_message = current_message
 
+    def delete_ollama_model(self, base_model):
+        return ollama.delete(base_model)
+
+    def create_ollama_model(self, model_name: str, modelfile_contents: str):
+        return ollama.create(model=model_name, modelfile=modelfile_contents)
+
     def stream(self, model: Model, prompt: Union[LmoeQuery, str]) -> None:
         """Stream a response from Ollama and save metadata associated with the call."""
         self._logger.debug(f"Sending message to {model.ollama_name()}")

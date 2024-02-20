@@ -19,9 +19,9 @@ class Initialize(Command):
     expert_registry: ExpertRegistry
     model_registry: ModelRegistry
     ollama_client: OllamaClient
-    refresh: Refresh
 
     def execute(self, parsed_args: argparse.Namespace, lmoe_query: LmoeQuery) -> None:
+        # Pull base ollama models if needed
         base_models_needed = self.model_registry.base_models_required()
         print("Base Ollama models needed: ", base_models_needed)
         installed_models = self.model_registry.installed_ollama_model_names()
@@ -33,4 +33,7 @@ class Initialize(Command):
                 stream = self.ollama_client.install_ollama_model(base_model)
                 for chunk in stream:
                     print("    ", chunk)
-        self.refresh.generate(lmoe_query)
+
+        # Refresh (create or delete/recreate) lmoe models, which are modifications of ollama models.
+        print("Refreshing Ollama's models: ", self.model_registry.lmoe_model_names())
+        self.model_registry.refresh()
