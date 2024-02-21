@@ -22,6 +22,9 @@ class NativeModule(Module):
             default=None,
             help="Query for lmoe. Use natural language.",
         )
+        parser.add_argument(
+            "--passthrough", help="The ollama model to pass the query directly through."
+        )
 
         ## Behavior flags
         parser.add_argument(
