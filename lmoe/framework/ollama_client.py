@@ -97,10 +97,14 @@ class OllamaClient:
 
     def stream(self, model: Model, prompt: Union[LmoeQuery, str]) -> None:
         """Stream a response from Ollama and save metadata associated with the call."""
-        self._logger.debug(f"Sending message to {model.ollama_name()}")
+        self.stream_raw(model.ollama_name(), prompt=str(prompt))
+
+    def stream_raw(self, model_name: str, prompt: str) -> None:
+        """Stream a response from Ollama and save metadata associated with the call."""
+        self._logger.debug(f"Sending message to {model_name}")
         stream = ollama.generate(
-            model=model.ollama_name(),
-            prompt=str(prompt),
+            model=model_name,
+            prompt=prompt,
             stream=True,
         )
         response = ""
