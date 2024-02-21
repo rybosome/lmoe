@@ -13,14 +13,14 @@ import ollama
 @dataclass
 class ModelCallReport:
 
-    response: str
-    context: Optional[Iterator[int]]
-    total_duration: int
-    load_duration: int
-    prompt_eval_count: int
-    prompt_eval_duration: int
-    eval_count: int
-    eval_duration: int
+    response: str = ""
+    context: Optional[Iterator[int]] = None
+    total_duration: int = 0
+    load_duration: int = 0
+    prompt_eval_count: int = 0
+    prompt_eval_duration: int = 0
+    eval_count: int = 0
+    eval_duration: int = 0
 
     def diagnostic_info(self):
         d = asdict(self)
