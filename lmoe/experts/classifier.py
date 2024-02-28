@@ -15,16 +15,23 @@ import ollama
 
 _EXAMPLE_TEMPLATE = Template(
     """
-user: $example_query
-agent: $expert_type
+<start_of_turn>user
+$example_query
+<end_of_turn>
+<start_of_turn>model
+$expert_type
+<end_of_turn>
 """
 )
 
 
 _PROMPT_TEMPLATE = Template(
     """
-user: $user_query
-agent: """
+<start_of_turn>user
+$user_query
+<end_of_turn>
+<start_of_turn>model
+"""
 )
 
 _WITHOUT_CLASSIFIER = ExpertRegistry.Without(name="CLASSIFIER")
@@ -63,8 +70,9 @@ class ClassifierModel(Model):
                         expert_type=e.name(),
                     )
                 )
-        modelfile_template = Template(read_template(self.modelfile_name()))
+        modelfile_template = read_template(self.modelfile_name())
         return modelfile_template.substitute(
+            base_ollama_model=self.parent_ollama_name(),
             all_experts=all_experts,
             all_experts_with_descriptions=all_experts_with_descriptions,
             all_examples="\n".join(examples),
@@ -99,12 +107,13 @@ class Classifier(ModelExpert):
         return all_example_queries
 
     def classify(self, user_query):
-        self.logger.debug("Classifying user query")
+        self.logger.debug(f"Classifying user query: {user_query}")
         model_response = ollama.generate(
             model=self.model().ollama_name(),
             prompt=_PROMPT_TEMPLATE.substitute(user_query=user_query),
         )
         unescaped_model_response = model_response["response"].replace(r"\_", "_")
+        self.logger.debug(f"Unescaped model response: {unescaped_model_response}")
         for name in self.expert_registry.names():
             match = re.match(f"^[\s]*{name}.*", unescaped_model_response)
             if match:

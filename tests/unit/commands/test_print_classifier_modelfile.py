@@ -13,4 +13,6 @@ class TestPrintClassifierModelfile:
             real_injector.get(PrintClassifierModelfile).execute(
                 argparse.Namespace(), LmoeQuery.empty()
             )
-            assert "you are a classifier" in console_output.getvalue()
+            assert (
+                "It is your job to classify a user's query" in console_output.getvalue()
+            )

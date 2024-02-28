@@ -1,4 +1,4 @@
-FROM mistral
+FROM $base_ollama_model
 SYSTEM """
 #) Overview
 

@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 from lmoe.api.model import Model
-from lmoe.utils.templates import read_template
 from typing import List, Optional
 
 

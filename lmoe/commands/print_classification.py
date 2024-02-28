@@ -14,4 +14,4 @@ class PrintClassification(Command):
     classifier: Classifier
 
     def execute(self, parsed_args: argparse.Namespace, lmoe_query: LmoeQuery) -> None:
-        print(self.classifier.classify(lmoe_query))
+        print(self.classifier.classify(lmoe_query.user_query))

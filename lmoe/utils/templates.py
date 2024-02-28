@@ -21,12 +21,12 @@ def load_templates():
     return _TEMPLATES
 
 
-def read_template(filename):
+def read_template(filename) -> Template:
     templates = load_templates()
     if not filename in templates:
         raise Exception("Could not find: " + filename)
     template = templates[filename]
-    return template.read_text()
+    return Template(template.read_text())
 
 
 def read_yaml_file(filename):

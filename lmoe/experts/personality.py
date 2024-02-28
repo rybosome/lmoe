@@ -10,7 +10,6 @@ from lmoe.utils.templates import (
     read_yaml_examples,
     render_examples,
 )
-from string import Template
 
 import ollama
 
@@ -22,7 +21,7 @@ class PersonalityModel(Model):
         super(PersonalityModel, self).__init__("PERSONALITY")
 
     def modelfile_contents(self):
-        modelfile_template = Template(read_template(self.modelfile_name()))
+        modelfile_template = read_template(self.modelfile_name())
         return modelfile_template.substitute(
             all_examples=render_examples(self.examples)
         )
