@@ -16,7 +16,7 @@ from typing import Optional
 
 def parse_version(model_name: str) -> Optional[Version]:
     # Modern lmoe naming scheme
-    match = re.match("lmoe[^:]:([0-9]+\.[0-9]+\.[0-9]+.*)", model_name)
+    match = re.match("lmoe.*?:([0-9]+\.[0-9]+\.[0-9]+.*)", model_name)
     if match:
         return Version(match.group(1))
 
@@ -45,8 +45,11 @@ class Cleanup(Command):
             if (parsed_version := parse_version(m)) and parsed_version < current_version
         ]
 
-        print(f"Deleting these models:\n\n", models_to_delete)
+        if not models_to_delete:
+            print("Already cleaned up")
+            exit(0)
 
+        print(f"Deleting these models:\n", models_to_delete)
         confirmation = input("Proceed? (y/n): ")
         if confirmation == "y":
             for m in models_to_delete:

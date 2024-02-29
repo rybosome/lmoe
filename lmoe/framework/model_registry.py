@@ -23,7 +23,7 @@ class ModelRegistry:
             match = re.match(r"FROM ([^\s]+).*", modelfile_contents)
             if match:
                 base_models.add(match.group(1))
-        return base_models
+        return set([(m if ":" in m else f"{m}:latest") for m in base_models])
 
     def lmoe_model_names(self) -> Set[str]:
         return set(
