@@ -27,7 +27,7 @@ class Model:
 
     def ollama_name(self) -> str:
         """The name of this model in Ollama, a string which includes a namespace prefix and version."""
-        return f"lmoe_{self.name.lower()}_{get_project_version()}"
+        return f"lmoe_{self.name.lower()}:{get_project_version()}"
 
     def modelfile_name(self) -> str:
         """The filename (without a path) of the backing Ollama model.

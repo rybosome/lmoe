@@ -36,12 +36,7 @@ class ModelRegistry:
 
     def installed_ollama_model_names(self) -> Set[str]:
         """The set of underlying models currently installed in ollama."""
-        return set(
-            [
-                model.name.split(":")[0]
-                for model in self.ollama_client.installed_models()
-            ]
-        )
+        return set([model.name for model in self.ollama_client.installed_models()])
 
     def refresh(self):
         """Ensures that all installed models match their modelfile configuration."""
