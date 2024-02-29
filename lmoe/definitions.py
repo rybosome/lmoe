@@ -1,6 +1,7 @@
 import importlib.metadata
 import importlib.resources
 import os
+import semantic_version
 
 
 def get_template_module():
@@ -9,8 +10,8 @@ def get_template_module():
 
 
 def get_project_version():
-    """Returns the semantic versioning string associated with this project."""
-    return importlib.metadata.version("lmoe")
+    """Returns the current semantic_version.Version object for this project."""
+    return semantic_version.Version(importlib.metadata.version("lmoe"))
 
 
 # The absolute filenames of all resource template files

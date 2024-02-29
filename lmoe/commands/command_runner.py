@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from injector import inject
 from lmoe.api.lmoe_query import LmoeQuery
+from lmoe.commands.cleanup import Cleanup
 from lmoe.commands.initialize import Initialize
 from lmoe.commands.passthrough import Passthrough
 from lmoe.commands.print_classification import PrintClassification
@@ -18,6 +19,7 @@ class CommandRunner:
 
     parsed_args: argparse.Namespace
     lmoe_query: LmoeQuery
+    cleanup: Cleanup
     initialize: Initialize
     passthrough: Passthrough
     print_classification: PrintClassification
@@ -41,6 +43,8 @@ class CommandRunner:
             command = self.initialize
         elif self.parsed_args.passthrough:
             command = self.passthrough
+        elif self.parsed_args.cleanup:
+            command = self.cleanup
         else:
             command = self.query
 

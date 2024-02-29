@@ -40,6 +40,7 @@ class NativeModule(Module):
         parser.add_argument(
             "--version", action="store_true", help="Print the current version string."
         )
+        parser.add_argument("--cleanup", action="store_true", help="Remove old models.")
 
         ## Debug flags
         parser.add_argument(
