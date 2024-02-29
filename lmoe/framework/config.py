@@ -11,7 +11,7 @@ import toml
 _LMOE_CONFIG_FILE = os.path.join(os.path.expanduser("~"), ".lmoeconfig")
 
 # The default base model to use if none is specified in a config.
-_DEFAULT_BASE_OLLAMA_MODEL = "mistral"
+_DEFAULT_BASE_OLLAMA_MODEL = "mistral:7b-instruct-v0.2-q4_0"
 
 # Default configuration if none is supplied or able to be successfully read.
 _LMOE_DEFAULT_CONFIG = Template(
