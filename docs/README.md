@@ -231,7 +231,7 @@ Coming soon: `lmoe` will offer to run them for you, open them in an editor, or s
 
 ## Status
 
-**Version 0.3.17**
+**Version 0.3.18**
 
 Supports the following core experts:
 
